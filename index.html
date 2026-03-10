@@ -1,33 +1,173 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Corolas - Coming Soon</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="./assets/icon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="./assets/icon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./assets/icon/favicon-16x16.png">
+    <link rel="manifest" href="./assets/icon/site.webmanifest">
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
+        body {
+            font-family: "Inter", Arial;
             margin: 0;
-            background: #0a0a0a;
-            color: #fff;
+            background: #f5f7fa;
+            color: #1f2933;
         }
-        .container { text-align: center; }
-        h1 { font-size: 4rem; margin: 0; letter-spacing: -0.02em; }
-        p { color: #666; margin-top: 1rem; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 80px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .logo img {
+            width: 100px;
+            height: 100px;
+        }
+
+        .org-name {
+            font-weight: 700;
+            font-size: 22px;
+        }
+
+        nav a {
+            margin-left: 25px;
+            text-decoration: none;
+            color: #1f2933;
+        }
+
+        .hero {
+            padding: 140px 80px;
+            background: #0b1e2d;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 52px;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            max-width: 600px;
+            opacity: 0.9;
+        }
+
+        .section {
+            max-width: 1100px;
+            margin: auto;
+            padding: 90px 40px;
+        }
+
+        .section h2 {
+            font-size: 34px;
+            margin-bottom: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 35px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h3 {
+            margin-top: 0;
+        }
+
+        footer {
+            background: #0b1e2d;
+            color: white;
+            padding: 50px;
+            text-align: center;
+            margin-top: 60px;
+        }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Corolas</h1>
-        <p>AI + Bio Industry & Research · Coming Soon</p>
-    </div>
+    <header>
+        <div class="logo">
+            <img type="image/png" src="./assets/icon/android-chrome-512x512.png">
+        </div>
+        <div class="org-name">Corolas</div>
+        <nav>
+            <a href="#">Research</a>
+            <a href="#">Insights</a>
+            <a href="#">Topics</a>
+            <a href="#">About</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Mapping the Future of Biotechnology</h1>
+        <p>
+            Corolas is an independent research platform focused on biotechnology
+            industry analysis, frontier science, and emerging biological technologies.
+        </p>
+    </section>
+
+    <section class="section">
+        <h2>Research Areas</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Industry Analysis</h3>
+                <p>Market structure, venture investment, startup ecosystems and emerging biotech sectors.</p>
+            </div>
+            <div class="card">
+                <h3>Frontier Science</h3>
+                <p>Deep dives into new discoveries in gene editing, synthetic biology and bioengineering.</p>
+            </div>
+            <div class="card">
+                <h3>Technology Landscape</h3>
+                <p>Mapping the technologies shaping the future of the bioeconomy.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Latest Research</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Global CRISPR Industry Landscape</h3>
+                <p>A structural analysis of the gene editing industry and key players.</p>
+            </div>
+            <div class="card">
+                <h3>Synthetic Biology Market Map</h3>
+                <p>Understanding the startup ecosystem transforming biomanufacturing.</p>
+            </div>
+            <div class="card">
+                <h3>AI for Drug Discovery</h3>
+                <p>How machine learning is accelerating pharmaceutical innovation.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>About Corolas</h2>
+        <p>
+            Corolas is dedicated to building an open biotechnology intelligence platform.
+            Our work integrates scientific research, industry analysis and interdisciplinary
+            thinking to understand emerging biological technologies.
+        </p>
+    </section>
+
+    <footer>
+        <p>Copyright © 2026 Corolas. All rights reserved.</p>
+        <p>www.corolas.top</p>
+    </footer>
 </body>
+
 </html>
