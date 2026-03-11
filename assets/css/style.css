@@ -27,7 +27,7 @@
 
         .hero {
             padding: 140px 80px;
-            background: url("./image/corolas-hero.jpg") center/cover no-repeat;
+            background: url("../image/corolas-hero.jpg") center/cover no-repeat;
             color: white;
         }
 
