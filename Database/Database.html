@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhea Database - Corolas | AI × Bio Intelligence</title>
+    <link rel="icon" type="image/x-icon" href="../assets/icon/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    
+    <header class="glass-header">
+        <div class="logo">
+            <img src="../assets/icon/corolas-logo-white.png" alt="Corolas">
+            <span class="logo-text">COROLAS</span>
+        </div>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../Research/Research.html">Research</a>
+            <a href="Database.html" class="active">Database</a>
+            <a href="../Topic/Topic.html">Topic</a>
+            <a href="../About/About.html">About</a>
+        </nav>
+        <button class="mobile-menu-btn" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <!-- Database Hero -->
+    <section class="db-hero">
+        <div class="db-hero-content">
+            <div class="db-badge">
+                <span class="db-status"></span>
+                Rhea Database
+            </div>
+            <h1 class="db-title">Intelligence Repository</h1>
+            <p class="db-subtitle">
+                Comprehensive mapping of AI × Bio ecosystem. 
+                Search organizations, key people, and products shaping the future of biotechnology.
+            </p>
+            <div class="db-stats-bar">
+                <div class="db-stat">
+                    <span class="db-stat-num" id="org-count">0</span>
+                    <span class="db-stat-label">Organizations</span>
+                </div>
+                <div class="db-stat-divider"></div>
+                <div class="db-stat">
+                    <span class="db-stat-num" id="people-count">0</span>
+                    <span class="db-stat-label">People</span>
+                </div>
+                <div class="db-stat-divider"></div>
+                <div class="db-stat">
+                    <span class="db-stat-num" id="product-count">0</span>
+                    <span class="db-stat-label">Products</span>
+                </div>
+            </div>
+        </div>
+        <div class="db-visual">
+            <div class="data-ring ring-1"></div>
+            <div class="data-ring ring-2"></div>
+            <div class="data-ring ring-3"></div>
+            <div class="data-core"></div>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section" id="search">
+        <div class="search-container">
+            <div class="search-tabs">
+                <button class="search-tab active" data-tab="organizations">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    Organizations
+                </button>
+                <button class="search-tab" data-tab="people">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    People
+                </button>
+                <button class="search-tab" data-tab="products">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                    </svg>
+                    Products
+                </button>
+            </div>
+
+            <div class="search-box-wrapper">
+                <div class="search-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </div>
+                <input type="text" 
+                       class="search-input" 
+                       id="search-input" 
+                       placeholder="Search organizations, companies, labs..."
+                       autocomplete="off">
+                <div class="search-shortcut">
+                    <kbd>Ctrl</kbd> <kbd>K</kbd>
+                </div>
+                <button class="search-clear" id="search-clear" aria-label="Clear search">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="search-filters" id="search-filters">
+                <span class="filter-label">Filter by:</span>
+                <button class="filter-chip active" data-filter="all">All Fields</button>
+                <button class="filter-chip" data-filter="drug-discovery">Drug Discovery</button>
+                <button class="filter-chip" data-filter="genomics">Genomics</button>
+                <button class="filter-chip" data-filter="synthetic-biology">Synthetic Biology</button>
+                <button class="filter-chip" data-filter="diagnostics">Diagnostics</button>
+                <button class="filter-chip" data-filter="bio-manufacturing">Bio-manufacturing</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section" id="results">
+        <div class="results-header">
+            <div class="results-info">
+                <h2 id="results-title">Leading Organizations</h2>
+                <span class="results-count" id="results-count">Showing featured entries</span>
+            </div>
+            <div class="results-view-toggle">
+                <button class="view-btn active" data-view="grid" aria-label="Grid view">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                </button>
+                <button class="view-btn" data-view="list" aria-label="List view">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="results-grid" id="results-grid">
+            <!-- Loading State -->
+            <div class="loading-state" id="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Connecting to Rhea Database...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <div class="empty-icon">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                        <path d="M8 8l6 6"></path>
+                        <path d="M14 8l-6 6"></path>
+                    </svg>
+                </div>
+                <h3>No results found</h3>
+                <p>Try adjusting your search terms or filters</p>
+            </div>
+
+            <!-- Cards will be injected here by JS -->
+        </div>
+
+        <div class="load-more" id="load-more" style="display: none;">
+            <button class="btn-secondary">Load More</button>
+        </div>
+    </section>
+
+    <!-- Featured Section (shown when no search) -->
+    <section class="featured-db-section" id="featured-section">
+        <div class="featured-header">
+            <span class="section-index">Featured</span>
+            <h2>Leading Organizations</h2>
+            <p>Pioneering institutions shaping the AI × Bio landscape</p>
+        </div>
+        <div class="featured-grid" id="featured-grid">
+            <!-- Featured cards injected by JS -->
+        </div>
+    </section>
+
+    <!-- Data Schema Info -->
+    <section class="schema-section">
+        <div class="schema-content">
+            <div class="schema-header">
+                <span class="section-index">API</span>
+                <h2>Data Schema</h2>
+                <p>Rhea Database is accessible via REST API and updated daily through automated pipelines</p>
+            </div>
+            <div class="schema-cards">
+                <div class="schema-card">
+                    <div class="schema-icon org-icon">Org</div>
+                    <h4>Organizations</h4>
+                    <code class="schema-code">
+{
+  "name": "String",
+  "description": "String",
+  "field": "Array",
+  "founded": "Number",
+  "location": "String",
+  "website": "URL",
+  "funding": "Object",
+  "technologies": "Array"
+}
+                    </code>
+                </div>
+                <div class="schema-card">
+                    <div class="schema-icon people-icon">Ppl</div>
+                    <h4>People</h4>
+                    <code class="schema-code">
+{
+  "name": "String",
+  "description": "String",
+  "field": "Array",
+  "role": "String",
+  "organization": "String",
+  "expertise": "Array",
+  "publications": "Number",
+  "links": "Object"
+}
+                    </code>
+                </div>
+                <div class="schema-card">
+                    <div class="schema-icon product-icon">Prd</div>
+                    <h4>Products</h4>
+                    <code class="schema-code">
+{
+  "name": "String",
+  "description": "String",
+  "field": "Array",
+  "type": "String",
+  "developer": "String",
+  "status": "String",
+  "launched": "Date",
+  "features": "Array"
+}
+                    </code>
+                </div>
+            </div>
+            <div class="api-status">
+                <div class="status-indicator active">
+                    <span class="status-dot"></span>
+                    <span class="status-text">API Status: Operational</span>
+                </div>
+                <span class="last-updated">Last updated: <span id="last-updated">Just now</span></span>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="logo">
+                    <img src="../assets/icon/corolas-logo-white.png" alt="Corolas">
+                    <span>COROLAS</span>
+                </div>
+                <p>Mapping the Frontiers of AI in Biotechnology</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Twitter">𝕏</a>
+                    <a href="#" aria-label="LinkedIn">in</a>
+                    <a href="#" aria-label="GitHub">⌘</a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Database</h4>
+                <a href="#">Organizations</a>
+                <a href="#">People</a>
+                <a href="#">Products</a>
+                <a href="#">API Docs</a>
+            </div>
+            <div class="footer-links">
+                <h4>Company</h4>
+                <a href="../About/About.html">About</a>
+                <a href="#">Team</a>
+                <a href="#">Careers</a>
+            </div>
+            <div class="footer-links">
+                <h4>Connect</h4>
+                <a href="#">Contact</a>
+                <a href="#">Newsletter</a>
+                <a href="#">RSS</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Copyright © 2026 Corolas. All rights reserved.</p>
+            <p>www.corolas.top</p>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        // Database Page Specific Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            // State management
+            const state = {
+                currentTab: 'organizations',
+                currentFilter: 'all',
+                searchQuery: '',
+                viewMode: 'grid',
+                data: {
+                    organizations: [],
+                    people: [],
+                    products: []
+                },
+                loading: true
+            };
+
+            // DOM Elements
+            const searchInput = document.getElementById('search-input');
+            const searchClear = document.getElementById('search-clear');
+            const searchTabs = document.querySelectorAll('.search-tab');
+            const filterChips = document.querySelectorAll('.filter-chip');
+            const viewBtns = document.querySelectorAll('.view-btn');
+            const resultsGrid = document.getElementById('results-grid');
+            const resultsTitle = document.getElementById('results-title');
+            const resultsCount = document.getElementById('results-count');
+            const loadingState = document.getElementById('loading-state');
+            const emptyState = document.getElementById('empty-state');
+            const featuredSection = document.getElementById('featured-section');
+            const featuredGrid = document.getElementById('featured-grid');
+
+            // Initialize
+            initializeData();
+            setupEventListeners();
+            updateLastUpdated();
+
+            // Mock Data Initialization (Replace with actual Supabase API calls)
+            async function initializeData() {
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Mock data - replace with actual Supabase fetch
+                state.data.organizations = generateMockOrganizations();
+                state.data.people = generateMockPeople();
+                state.data.products = generateMockProducts();
+                
+                state.loading = false;
+                updateStats();
+                renderFeatured();
+                performSearch();
+            }
+
+            function generateMockOrganizations() {
+                return [
+                    {
+                        id: 1,
+                        name: "DeepMind AlphaFold",
+                        description: "AI system predicting protein structures with unprecedented accuracy, revolutionizing structural biology and drug discovery.",
+                        field: ["drug-discovery", "structural-biology"],
+                        founded: 2010,
+                        location: "London, UK",
+                        funding: { stage: "Acquired", amount: "$600M" },
+                        technologies: ["AlphaFold", "AI", "Protein Prediction"],
+                        type: "organization",
+                        featured: true
+                    },
+                    {
+                        id: 2,
+                        name: "Insilico Medicine",
+                        description: "End-to-end AI-driven drug discovery company utilizing generative adversarial networks for de novo molecular design.",
+                        field: ["drug-discovery", "genomics"],
+                        founded: 2014,
+                        location: "Hong Kong / New York",
+                        funding: { stage: "Series D", amount: "$400M+" },
+                        technologies: ["Chemistry42", "PandaOmics", "inClinico"],
+                        type: "organization",
+                        featured: true
+                    },
+                    {
+                        id: 3,
+                        name: "Recursion Pharmaceuticals",
+                        description: "TechBio company decoding biology to industrialize drug discovery through massive experimental data and machine learning.",
+                        field: ["drug-discovery", "cell-biology"],
+                        founded: 2013,
+                        location: "Salt Lake City, UT",
+                        funding: { stage: "Public", amount: "$239M IPO" },
+                        technologies: ["Recursion OS", "Phenomics"],
+                        type: "organization",
+                        featured: true
+                    },
+                    {
+                        id: 4,
+                        name: "Ginkgo Bioworks",
+                        description: "Cell programming platform designing custom organisms for food, pharma, and materials applications using synthetic biology.",
+                        field: ["synthetic-biology", "bio-manufacturing"],
+                        founded: 2008,
+                        location: "Boston, MA",
+                        funding: { stage: "Public", amount: "$2.5B SPAC" },
+                        technologies: ["Foundry", "Codebase", "Cell Engineering"],
+                        type: "organization"
+                    },
+                    {
+                        id: 5,
+                        name: "Atomwise",
+                        description: "AI-powered virtual screening platform for small molecule drug discovery using deep convolutional neural networks.",
+                        field: ["drug-discovery"],
+                        founded: 2012,
+                        location: "San Francisco, CA",
+                        funding: { stage: "Series B", amount: "$176M" },
+                        technologies: ["AtomNet", "Virtual Screening"],
+                        type: "organization"
+                    }
+                ];
+            }
+
+            function generateMockPeople() {
+                return [
+                    {
+                        id: 1,
+                        name: "Dr. Demis Hassabis",
+                        description: "CEO and Co-founder of DeepMind, Nobel Prize laureate in Chemistry 2024 for AlphaFold protein structure prediction work.",
+                        field: ["ai-research", "structural-biology"],
+                        role: "CEO & Co-founder",
+                        organization: "DeepMind / Isomorphic Labs",
+                        expertise: ["AI", "Neuroscience", "Protein Folding"],
+                        publications: 200,
+                        type: "people",
+                        featured: true
+                    },
+                    {
+                        id: 2,
+                        name: "Dr. Daphne Koller",
+                        description: "CEO and Founder of insitro, former Stanford professor, pioneering machine learning applications in drug discovery.",
+                        field: ["drug-discovery", "ml-research"],
+                        role: "CEO & Founder",
+                        organization: "insitro",
+                        expertise: ["Machine Learning", "Computational Biology", "Genomics"],
+                        publications: 300,
+                        type: "people",
+                        featured: true
+                    },
+                    {
+                        id: 3,
+                        name: "Dr. Feng Zhang",
+                        description: "Core Institute Member at Broad Institute, pioneer in CRISPR gene editing and optogenetics, co-founder of Editas and Beam.",
+                        field: ["genomics", "gene-editing"],
+                        role: "Core Institute Member",
+                        organization: "Broad Institute",
+                        expertise: ["CRISPR", "Gene Editing", "Neuroscience"],
+                        publications: 150,
+                        type: "people",
+                        featured: true
+                    }
+                ];
+            }
+
+            function generateMockProducts() {
+                return [
+                    {
+                        id: 1,
+                        name: "AlphaFold 3",
+                        description: "State-of-the-art AI model predicting structures of proteins, DNA, RNA, and small molecules with atomic accuracy.",
+                        field: ["structural-biology", "drug-discovery"],
+                        type: "AI Model",
+                        developer: "DeepMind / Isomorphic Labs",
+                        status: "Released",
+                        launched: "2024-05-08",
+                        features: ["Protein Structure", "Ligand Prediction", "Antibody Modeling"],
+                        type: "product",
+                        featured: true
+                    },
+                    {
+                        id: 2,
+                        name: "Chemistry42",
+                        description: "Generative AI platform for de novo molecular design, generating novel drug-like molecules in hours instead of months.",
+                        field: ["drug-discovery", "chemistry"],
+                        type: "Software Platform",
+                        developer: "Insilico Medicine",
+                        status: "Commercial",
+                        launched: "2020-09-15",
+                        features: ["Generative Chemistry", "Scoring", "Synthesis Planning"],
+                        type: "product",
+                        featured: true
+                    },
+                    {
+                        id: 3,
+                        name: "Ginkgo Biosecurity",
+                        description: "Pathogen monitoring and biosecurity platform utilizing synthetic biology for threat detection and response.",
+                        field: ["biosecurity", "synthetic-biology"],
+                        type: "Platform",
+                        developer: "Ginkgo Bioworks",
+                        status: "Active",
+                        launched: "2021-03-10",
+                        features: ["Pathogen Detection", "Genomic Surveillance", "Biosecurity"],
+                        type: "product",
+                        featured: true
+                    }
+                ];
+            }
+
+            function setupEventListeners() {
+                // Tab switching
+                searchTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        searchTabs.forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        state.currentTab = tab.dataset.tab;
+                        updateSearchPlaceholder();
+                        performSearch();
+                    });
+                });
+
+                // Search input
+                searchInput.addEventListener('input', (e) => {
+                    state.searchQuery = e.target.value.toLowerCase();
+                    toggleClearButton();
+                    performSearch();
+                });
+
+                // Clear button
+                searchClear.addEventListener('click', () => {
+                    searchInput.value = '';
+                    state.searchQuery = '';
+                    toggleClearButton();
+                    performSearch();
+                    searchInput.focus();
+                });
+
+                // Filters
+                filterChips.forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        filterChips.forEach(c => c.classList.remove('active'));
+                        chip.classList.add('active');
+                        state.currentFilter = chip.dataset.filter;
+                        performSearch();
+                    });
+                });
+
+                // View toggle
+                viewBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        viewBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        state.viewMode = btn.dataset.view;
+                        resultsGrid.classList.toggle('list-view', state.viewMode === 'list');
+                    });
+                });
+
+                // Keyboard shortcut
+                document.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        searchInput.focus();
+                    }
+                });
+            }
+
+            function updateSearchPlaceholder() {
+                const placeholders = {
+                    organizations: 'Search organizations, companies, labs...',
+                    people: 'Search researchers, founders, scientists...',
+                    products: 'Search AI models, platforms, tools...'
+                };
+                searchInput.placeholder = placeholders[state.currentTab];
+            }
+
+            function toggleClearButton() {
+                searchClear.style.display = state.searchQuery ? 'flex' : 'none';
+            }
+
+            function performSearch() {
+                if (state.loading) return;
+
+                const data = state.data[state.currentTab];
+                let filtered = data;
+
+                // Apply search filter
+                if (state.searchQuery) {
+                    filtered = filtered.filter(item => 
+                        item.name.toLowerCase().includes(state.searchQuery) ||
+                        item.description.toLowerCase().includes(state.searchQuery) ||
+                        item.field.some(f => f.toLowerCase().includes(state.searchQuery))
+                    );
+                }
+
+                // Apply field filter
+                if (state.currentFilter !== 'all') {
+                    filtered = filtered.filter(item => 
+                        item.field.includes(state.currentFilter)
+                    );
+                }
+
+                renderResults(filtered);
+                updateResultsHeader(filtered.length);
+                toggleFeaturedSection(state.searchQuery === '' && state.currentFilter === 'all');
+            }
+
+            function renderResults(items) {
+                if (items.length === 0) {
+                    resultsGrid.innerHTML = '';
+                    resultsGrid.appendChild(emptyState);
+                    emptyState.style.display = 'flex';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+                resultsGrid.innerHTML = items.map(item => createCardHTML(item)).join('');
+
+                // Add expand functionality
+                document.querySelectorAll('.card-expand-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const card = e.target.closest('.db-card');
+                        card.classList.toggle('expanded');
+                        const icon = btn.querySelector('svg');
+                        icon.style.transform = card.classList.contains('expanded') ? 'rotate(180deg)' : '';
+                    });
+                });
+            }
+
+            function createCardHTML(item) {
+                const isOrg = item.type === 'organization';
+                const isPeople = item.type === 'people';
+                const isProduct = item.type === 'product';
+
+                let metaHTML = '';
+                if (isOrg) {
+                    metaHTML = `
+                        <div class="card-meta">
+                            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>${item.location}</span>
+                            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Founded ${item.founded}</span>
+                            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></line></svg>${item.funding.stage}</span>
+                        </div>
+                    `;
+                } else if (isPeople) {
+                    metaHTML = `
+                        <div class="card-meta">
+                            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>${item.role}</span>
+                            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>${item.organization}</span>
+                            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>${item.publications} Publications</span>
+                        </div>
+                    `;
+                } else if (isProduct) {
+                    metaHTML = `
+                        <div class="card-meta">
+                            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>${item.type}</span>
+                            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>${item.developer}</span>
+                            <span class="meta-item status-${item.status.toLowerCase().replace(' ', '-')}">${item.status}</span>
+                        </div>
+                    `;
+                }
+
+                const fieldsHTML = item.field.map(f => 
+                    `<span class="field-tag">${f.replace(/-/g, ' ')}</span>`
+                ).join('');
+
+                const detailsHTML = isOrg ? `
+                    <div class="card-details">
+                        <div class="detail-section">
+                            <h5>Technologies</h5>
+                            <div class="tech-tags">
+                                ${item.technologies.map(t => `<span class="tech-tag">${t}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <h5>Funding Details</h5>
+                            <p>${item.funding.amount} total raised</p>
+                        </div>
+                    </div>
+                ` : isPeople ? `
+                    <div class="card-details">
+                        <div class="detail-section">
+                            <h5>Expertise</h5>
+                            <div class="tech-tags">
+                                ${item.expertise.map(e => `<span class="tech-tag">${e}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="card-details">
+                        <div class="detail-section">
+                            <h5>Key Features</h5>
+                            <ul class="feature-list">
+                                ${item.features.map(f => `<li>${f}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h5>Launch Date</h5>
+                            <p>${new Date(item.launched).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                `;
+
+                return `
+                    <article class="db-card" data-type="${item.type}">
+                        <div class="card-header">
+                            <div class="card-icon ${item.type}-icon">
+                                ${isOrg ? 'Org' : isPeople ? 'Ppl' : 'Prd'}
+                            </div>
+                            <div class="card-title-group">
+                                <h3 class="card-title">${item.name}</h3>
+                                <div class="card-fields">${fieldsHTML}</div>
+                            </div>
+                            <button class="card-expand-btn" aria-label="Expand details">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-description">${item.description}</p>
+                            ${metaHTML}
+                        </div>
+                        <div class="card-expandable">
+                            ${detailsHTML}
+                            <div class="card-actions">
+                                <button class="btn-text">View Profile</button>
+                                <button class="btn-text">Related Entries</button>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }
+
+            function updateResultsHeader(count) {
+                const tabNames = {
+                    organizations: 'Organizations',
+                    people: 'People',
+                    products: 'Products'
+                };
+                
+                if (state.searchQuery || state.currentFilter !== 'all') {
+                    resultsTitle.textContent = `Search Results`;
+                    resultsCount.textContent = `${count} ${tabNames[state.currentTab].toLowerCase()} found`;
+                } else {
+                    resultsTitle.textContent = `All ${tabNames[state.currentTab]}`;
+                    resultsCount.textContent = `${count} entries in database`;
+                }
+            }
+
+            function toggleFeaturedSection(show) {
+                featuredSection.style.display = show ? 'block' : 'none';
+                if (show) renderFeatured();
+            }
+
+            function renderFeatured() {
+                const featured = state.data[state.currentTab].filter(item => item.featured);
+                featuredGrid.innerHTML = featured.map(item => `
+                    <div class="featured-card" onclick="document.getElementById('search-input').value = '${item.name}'; document.getElementById('search-input').dispatchEvent(new Event('input'));">
+                        <div class="featured-icon">${item.type === 'organization' ? 'Org' : item.type === 'people' ? 'Ppl' : 'Prd'}</div>
+                        <h4>${item.name}</h4>
+                        <p>${item.description.substring(0, 100)}...</p>
+                        <span class="featured-link">View Details →</span>
+                    </div>
+                `).join('');
+            }
+
+            function updateStats() {
+                animateNumber('org-count', state.data.organizations.length);
+                animateNumber('people-count', state.data.people.length);
+                animateNumber('product-count', state.data.products.length);
+            }
+
+            function animateNumber(id, target) {
+                const el = document.getElementById(id);
+                const duration = 2000;
+                const step = target / (duration / 16);
+                let current = 0;
+                
+                const update = () => {
+                    current += step;
+                    if (current < target) {
+                        el.textContent = Math.floor(current);
+                        requestAnimationFrame(update);
+                    } else {
+                        el.textContent = target;
+                    }
+                };
+                update();
+            }
+
+            function updateLastUpdated() {
+                const now = new Date();
+                document.getElementById('last-updated').textContent = now.toLocaleTimeString();
+            }
+        });
+    </script>
+</body>
+</html>
