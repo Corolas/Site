@@ -2143,10 +2143,10 @@ nav a.active::after {
     background: var(--bg-secondary);
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 70px;
+    position: relative;
+    top: auto;
     z-index: 100;
-    backdrop-filter: blur(20px);
+    backdrop-filter: none;
 }
 
 .search-container {
