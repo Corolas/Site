@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,11 +9,14 @@
     <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <canvas id="bg-canvas"></canvas>
-    
+
     <header class="glass-header">
         <div class="logo">
             <img src="../assets/icon/corolas-logo-white.png" alt="Corolas">
@@ -41,7 +45,7 @@
             </div>
             <h1 class="db-title">Intelligence Repository</h1>
             <p class="db-subtitle">
-                Comprehensive mapping of AI × Bio ecosystem. 
+                Comprehensive mapping of AI × Bio ecosystem.
                 Search organizations, key people, and products shaping the future of biotechnology.
             </p>
             <div class="db-stats-bar">
@@ -117,11 +121,8 @@
                         <path d="m21 21-4.35-4.35"></path>
                     </svg>
                 </div>
-                <input type="text" 
-                       class="search-input" 
-                       id="search-input" 
-                       placeholder="Search organizations, companies, labs..."
-                       autocomplete="off">
+                <input type="text" class="search-input" id="search-input"
+                    placeholder="Search organizations, companies, labs..." autocomplete="off">
                 <div class="search-shortcut">
                     <kbd>Ctrl</kbd> <kbd>K</kbd>
                 </div>
@@ -142,7 +143,8 @@
                 <button class="filter-chip" data-filter="Genomics & Multi-omics">Genomics & Multi-omics</button>
                 <button class="filter-chip" data-filter="Longevity & Aging">Longevity & Aging</button>
                 <button class="filter-chip" data-filter="Precision Medicine">Precision Medicine</button>
-                <button class="filter-chip" data-filter="Protein & Structural Biology">Protein & Structural Biology</button>
+                <button class="filter-chip" data-filter="Protein & Structural Biology">Protein & Structural
+                    Biology</button>
                 <button class="filter-chip" data-filter="Synthetic Biology">Synthetic Biology</button>
             </div>
         </div>
@@ -187,7 +189,8 @@
             <!-- Empty State -->
             <div class="empty-state" id="empty-state" style="display: none;">
                 <div class="empty-icon">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
                         <circle cx="11" cy="11" r="8"></circle>
                         <path d="m21 21-4.35-4.35"></path>
                         <path d="M8 8l6 6"></path>
@@ -258,24 +261,19 @@
         </div>
     </footer>
 
-    <script src="../assets/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // 【更新】Supabase 配置
+        // Supabase 配置
         const SUPABASE_URL = 'https://utfcnjaspqklrirxpwlg.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0ZmNuamFzcHFrbHJpcnhwd2xnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxMDQ3NDgsImV4cCI6MjA4ODY4MDc0OH0.hoeWKwGpDhVjO60sQxtkzH26Nq7a0b0IeW-u_4ctKGY';
-        
-        // 【更新】存储桶文件路径
-        const STORAGE_PATHS = {
-            organizations: '/v1/storage/object/list/Rhea/Organization/Organization.json',
-            people: '/v1/storage/object/list/Rhea/People/People.json',
-            products: '/v1/storage/object/list/Rhea/Product/Product.json',
-            papers: '/v1/storage/object/list/Rhea/Paper/Paper.json'
-        };
+        const SUPABASE_KEY = 'sb_publishable_KhL5BB287kmaFplwyF5nTg_VFM2OWRp';
 
-        // 【更新】Field 分类常量
+        // 初始化 Supabase 客户端
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Field 分类常量
         const FIELD_CATEGORIES = [
             "Agriculture & Food",
-            "Diagnostics & Imaging", 
+            "Diagnostics & Imaging",
             "Drug Discovery",
             "Genomics & Multi-omics",
             "Longevity & Aging",
@@ -298,7 +296,10 @@
                     products: [],
                     papers: []
                 },
-                loading: true
+                loading: true,
+                page: 0,
+                pageSize: 20,
+                hasMore: true
             };
 
             // DOM Elements
@@ -314,119 +315,95 @@
             const emptyState = document.getElementById('empty-state');
             const featuredSection = document.getElementById('featured-section');
             const featuredGrid = document.getElementById('featured-grid');
+            const loadMoreBtn = document.getElementById('load-more');
+
+            // 表名映射
+            const tableNames = {
+                organizations: 'organizations',
+                people: 'people',
+                products: 'products',
+                papers: 'papers'
+            };
 
             // Initialize
             initializeData();
             setupEventListeners();
 
-            // 【更新】从 Supabase Storage 获取数据
-            async function fetchFromStorage(path) {
-                try {
-                    const response = await fetch(`${SUPABASE_URL}${path}`, {
-                        headers: {
-                            'Application': `Bearer ${SUPABASE_ANON_KEY}`,
-                        }
-                    });
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return await response.json();
-                } catch (error) {
-                    console.error('Fetch error:', error);
-                    return null;
-                }
+            async function initializeData() {
+                // 并行加载统计数据和第一页数据
+                await Promise.all([
+                    loadStats(),
+                    performSearch()
+                ]);
+                state.loading = false;
+                renderFeatured();
             }
 
-            async function initializeData() {
-                // 并行获取所有数据
-                const [orgData, peopleData, productData, paperData] = await Promise.all([
-                    fetchFromStorage(STORAGE_PATHS.organizations),
-                    fetchFromStorage(STORAGE_PATHS.people),
-                    fetchFromStorage(STORAGE_PATHS.products),
-                    fetchFromStorage(STORAGE_PATHS.papers)
-                ]);
+            // 加载统计数据
+            async function loadStats() {
+                const tables = ['organizations', 'people', 'products', 'papers'];
+                const counts = await Promise.all(
+                    tables.map(async (table) => {
+                        const { count, error } = await supabaseClient
+                            .from(table)
+                            .select('*', { count: 'exact', head: true })
+                            .eq('status', 'active');
+                        return { table, count: error ? 0 : count };
+                    })
+                );
 
-                // 【更新】处理 Organization 数据 - 过滤 active 状态
-                if (orgData && orgData.Organization) {
-                    state.data.organizations = orgData.Organization
-                        .filter(org => org.status === 'active' && org.org_id) // 只显示 active 且 org_id 不为空
-                        .map(org => ({
-                            id: org.org_id,
-                            name: org.org_id, // 使用 org_id 作为显示名称
-                            official_name: org.official_name,
-                            description: org.description,
-                            field: Array.isArray(org.field) ? org.field : [org.field].filter(Boolean),
-                            category: org.organization_category,
-                            role: org.role,
-                            founders: org.founders,
-                            founded: org.founded_date,
-                            location: org.location,
-                            website: org.website,
-                            market_cap: org.market_cap,
-                            technologies: org.technologies_and_products,
-                            status: org.status,
-                            type: 'organization'
-                        }));
+                counts.forEach(({ table, count }) => {
+                    const elId = table === 'organizations' ? 'org-count' :
+                        table === 'people' ? 'people-count' :
+                            table === 'products' ? 'product-count' : 'paper-count';
+                    animateNumber(elId, count || 0);
+                    state.data[table] = new Array(count); // 预分配，用于 featured 截取
+                });
+            }
+
+            // 从 Supabase 获取数据
+            async function fetchFromSupabase(table, search = '', field = 'all', page = 0) {
+                const from = page * state.pageSize;
+                const to = from + state.pageSize - 1;
+
+                let query = supabaseClient
+                    .from(table)
+                    .select('*', { count: 'exact' })
+                    .eq('status', 'active')
+                    .order('id', { ascending: true })
+                    .range(from, to);
+
+                // 搜索过滤
+                if (search) {
+                    const searchTerm = `%${search}%`;
+                    if (table === 'organizations') {
+                        query = query.or(`id.ilike.${searchTerm},official_name.ilike.${searchTerm},description.ilike.${searchTerm},location.ilike.${searchTerm}`);
+                    } else if (table === 'people') {
+                        query = query.or(`name.ilike.${searchTerm},description.ilike.${searchTerm},position.ilike.${searchTerm}`);
+                    } else if (table === 'products') {
+                        query = query.or(`id.ilike.${searchTerm},description.ilike.${searchTerm},type.ilike.${searchTerm}`);
+                    } else if (table === 'papers') {
+                        query = query.or(`title.ilike.${searchTerm},abstract.ilike.${searchTerm},journal.ilike.${searchTerm}`);
+                    }
                 }
 
-                // 【更新】处理 People 数据 - 过滤 active 状态
-                if (peopleData && peopleData.people) {
-                    state.data.people = peopleData.people
-                        .filter(person => person.status === 'active' && person.name) // 只显示 active 且 name 不为空
-                        .map(person => ({
-                            id: person.name,
-                            name: person.name,
-                            degree: person['academic degree'],
-                            description: person.description,
-                            field: Array.isArray(person.field) ? person.field : [person.field].filter(Boolean),
-                            position: person.position,
-                            organizations: person.org_id, // 数组
-                            papers: person.paper_title,
-                            link: person.link,
-                            status: person.status,
-                            type: 'people'
-                        }));
+                // 字段过滤
+                if (field !== 'all') {
+                    query = query.contains('field', [field]);
                 }
 
-                // 【更新】处理 Product 数据 - 过滤 active 状态
-                if (productData && productData.product) {
-                    state.data.products = productData.product
-                        .filter(prod => prod.status === 'active' && prod.pro_id) // 只显示 active 且 pro_id 不为空
-                        .map(prod => ({
-                            id: prod.pro_id,
-                            name: prod.pro_id,
-                            description: prod.description,
-                            field: Array.isArray(prod.field) ? prod.field : [prod.field].filter(Boolean),
-                            type: prod.type,
-                            developer: prod.developer,
-                            org_id: prod.org_id,
-                            features: prod.features,
-                            status: prod.status,
-                            type: 'product'
-                        }));
+                const { data, error, count } = await query;
+
+                if (error) {
+                    console.error('Supabase error:', error);
+                    return { data: [], count: 0 };
                 }
 
-                // 【更新】处理 Paper 数据 - 过滤 active 状态
-                if (paperData && paperData.paper) {
-                    state.data.papers = paperData.paper
-                        .filter(paper => paper.status === 'active' && paper.title) // 只显示 active 且 title 不为空
-                        .map(paper => ({
-                            id: paper.doi || paper.title,
-                            title: paper.title,
-                            abstract: paper.abstract,
-                            field: paper.field === 'Array' ? [] : [paper.field].filter(Boolean),
-                            authors: paper.authors,
-                            journal: paper.journal,
-                            cited: paper.Cited,
-                            published: paper.published_date,
-                            doi: paper.doi,
-                            status: paper.status,
-                            type: 'paper'
-                        }));
-                }
-
-                state.loading = false;
-                updateStats();
-                renderFeatured();
-                performSearch();
+                return {
+                    data: data || [],
+                    count: count || 0,
+                    hasMore: (page + 1) * state.pageSize < count
+                };
             }
 
             function setupEventListeners() {
@@ -436,22 +413,32 @@
                         searchTabs.forEach(t => t.classList.remove('active'));
                         tab.classList.add('active');
                         state.currentTab = tab.dataset.tab;
+                        state.page = 0;
+                        state.hasMore = true;
                         updateSearchPlaceholder();
                         performSearch();
                     });
                 });
 
-                // Search input
+                // Search input with debounce
+                let debounceTimer;
                 searchInput.addEventListener('input', (e) => {
-                    state.searchQuery = e.target.value.toLowerCase();
-                    toggleClearButton();
-                    performSearch();
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        state.searchQuery = e.target.value.toLowerCase();
+                        state.page = 0;
+                        state.hasMore = true;
+                        toggleClearButton();
+                        performSearch();
+                    }, 300);
                 });
 
                 // Clear button
                 searchClear.addEventListener('click', () => {
                     searchInput.value = '';
                     state.searchQuery = '';
+                    state.page = 0;
+                    state.hasMore = true;
                     toggleClearButton();
                     performSearch();
                     searchInput.focus();
@@ -463,6 +450,8 @@
                         filterChips.forEach(c => c.classList.remove('active'));
                         chip.classList.add('active');
                         state.currentFilter = chip.dataset.filter;
+                        state.page = 0;
+                        state.hasMore = true;
                         performSearch();
                     });
                 });
@@ -475,6 +464,11 @@
                         state.viewMode = btn.dataset.view;
                         resultsGrid.classList.toggle('list-view', state.viewMode === 'list');
                     });
+                });
+
+                // Load more
+                loadMoreBtn.querySelector('button').addEventListener('click', () => {
+                    loadMore();
                 });
 
                 // Keyboard shortcut
@@ -500,54 +494,58 @@
                 searchClear.style.display = state.searchQuery ? 'flex' : 'none';
             }
 
-            function performSearch() {
-                if (state.loading) return;
+            async function performSearch(isLoadMore = false) {
+                if (state.loading && !isLoadMore) return;
 
-                const data = state.data[state.currentTab];
-                let filtered = data;
-
-                // Apply search filter
-                if (state.searchQuery) {
-                    filtered = filtered.filter(item => {
-                        const searchFields = [
-                            item.name || item.title,
-                            item.description || item.abstract,
-                            item.official_name,
-                            item.location,
-                            ...(item.field || []),
-                            ...(item.technologies || []),
-                            ...(item.founders || []),
-                            ...(item.authors || [])
-                        ].filter(Boolean).map(f => f.toLowerCase());
-                        
-                        return searchFields.some(field => field.includes(state.searchQuery));
-                    });
+                if (!isLoadMore) {
+                    loadingState.style.display = 'flex';
+                    resultsGrid.innerHTML = '';
+                    resultsGrid.appendChild(loadingState);
                 }
 
-                // Apply field filter
-                if (state.currentFilter !== 'all') {
-                    filtered = filtered.filter(item => 
-                        item.field && item.field.includes(state.currentFilter)
-                    );
+                const table = tableNames[state.currentTab];
+                const { data, count, hasMore } = await fetchFromSupabase(
+                    table,
+                    state.searchQuery,
+                    state.currentFilter,
+                    state.page
+                );
+
+                state.hasMore = hasMore;
+                loadMoreBtn.style.display = hasMore ? 'block' : 'none';
+
+                if (!isLoadMore) {
+                    loadingState.style.display = 'none';
                 }
 
-                renderResults(filtered);
-                updateResultsHeader(filtered.length);
-                toggleFeaturedSection(state.searchQuery === '' && state.currentFilter === 'all');
-            }
-
-            function renderResults(items) {
-                if (items.length === 0) {
+                if (data.length === 0 && !isLoadMore) {
                     resultsGrid.innerHTML = '';
                     resultsGrid.appendChild(emptyState);
                     emptyState.style.display = 'flex';
+                    updateResultsHeader(0);
+                    toggleFeaturedSection(state.searchQuery === '' && state.currentFilter === 'all');
                     return;
                 }
 
                 emptyState.style.display = 'none';
-                resultsGrid.innerHTML = items.map(item => createCardHTML(item)).join('');
+                toggleFeaturedSection(false);
 
-                // Add expand functionality
+                // 转换数据格式以适配现有卡片结构
+                const transformedData = data.map(item => transformData(item, state.currentTab));
+
+                if (isLoadMore) {
+                    // 追加到现有内容
+                    const newCards = transformedData.map(item => createCardHTML(item)).join('');
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = newCards;
+                    while (tempDiv.firstChild) {
+                        resultsGrid.appendChild(tempDiv.firstChild);
+                    }
+                } else {
+                    resultsGrid.innerHTML = transformedData.map(item => createCardHTML(item)).join('');
+                }
+
+                // 添加展开功能
                 document.querySelectorAll('.card-expand-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const card = e.target.closest('.db-card');
@@ -556,9 +554,80 @@
                         icon.style.transform = card.classList.contains('expanded') ? 'rotate(180deg)' : '';
                     });
                 });
+
+                updateResultsHeader(count);
             }
 
-            // 【更新】适配真实数据结构的卡片生成
+            async function loadMore() {
+                if (!state.hasMore) return;
+                state.page++;
+                await performSearch(true);
+            }
+
+            // 转换 Supabase 数据为前端格式
+            function transformData(item, type) {
+                if (type === 'organizations') {
+                    return {
+                        id: item.id,
+                        name: item.id, // org_id 作为显示名
+                        official_name: item.official_name,
+                        description: item.description,
+                        field: item.field || [],
+                        category: item.category,
+                        role: item.role,
+                        founders: item.founders,
+                        founded: item.founded_date,
+                        location: item.location,
+                        website: item.website,
+                        market_cap: item.market_cap,
+                        technologies: item.technologies,
+                        status: item.status,
+                        type: 'organization'
+                    };
+                } else if (type === 'people') {
+                    return {
+                        id: item.id,
+                        name: item.name,
+                        degree: item.academic_degree,
+                        description: item.description,
+                        field: item.field || [],
+                        position: item.position,
+                        organizations: item.org_ids,
+                        papers: item.paper_titles,
+                        link: item.link,
+                        status: item.status,
+                        type: 'people'
+                    };
+                } else if (type === 'products') {
+                    return {
+                        id: item.id,
+                        name: item.id, // pro_id 作为显示名
+                        description: item.description,
+                        field: item.field || [],
+                        type: item.type,
+                        developer: item.developer,
+                        org_id: item.org_id,
+                        features: item.features,
+                        status: item.status,
+                        type: 'product'
+                    };
+                } else if (type === 'papers') {
+                    return {
+                        id: item.id,
+                        title: item.title,
+                        abstract: item.abstract,
+                        field: item.field || [],
+                        authors: item.authors,
+                        journal: item.journal,
+                        cited: item.cited,
+                        published: item.published_date,
+                        doi: item.doi,
+                        status: item.status,
+                        type: 'paper'
+                    };
+                }
+            }
+
             function createCardHTML(item) {
                 const isOrg = item.type === 'organization';
                 const isPeople = item.type === 'people';
@@ -568,170 +637,170 @@
                 let metaHTML = '';
                 if (isOrg) {
                     metaHTML = `
-                        <div class="card-meta">
-                            ${item.location ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>${item.location}</span>` : ''}
-                            ${item.founded ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Founded ${item.founded}</span>` : ''}
-                            ${item.category ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>${item.category}</span>` : ''}
-                        </div>
-                    `;
+                    <div class="card-meta">
+                        ${item.location ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>${item.location}</span>` : ''}
+                        ${item.founded ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Founded ${item.founded}</span>` : ''}
+                        ${item.category ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>${item.category}</span>` : ''}
+                    </div>
+                `;
                 } else if (isPeople) {
                     metaHTML = `
-                        <div class="card-meta">
-                            ${item.position ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>${item.position}</span>` : ''}
-                            ${item.organizations ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>${Array.isArray(item.organizations) ? item.organizations[0] : item.organizations}</span>` : ''}
-                            ${item.degree ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>${item.degree}</span>` : ''}
-                        </div>
-                    `;
+                    <div class="card-meta">
+                        ${item.position ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>${item.position}</span>` : ''}
+                        ${item.organizations && item.organizations.length > 0 ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>${item.organizations[0]}</span>` : ''}
+                        ${item.degree ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>${item.degree}</span>` : ''}
+                    </div>
+                `;
                 } else if (isProduct) {
                     metaHTML = `
-                        <div class="card-meta">
-                            ${item.type ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>${item.type}</span>` : ''}
-                            ${item.org_id ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>${item.org_id}</span>` : ''}
-                            ${item.developer ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"></path><path d="M12 14c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z"></path></svg>${item.developer}</span>` : ''}
-                        </div>
-                    `;
+                    <div class="card-meta">
+                        ${item.type ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>${item.type}</span>` : ''}
+                        ${item.org_id ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>${item.org_id}</span>` : ''}
+                    </div>
+                `;
                 } else if (isPaper) {
                     metaHTML = `
-                        <div class="card-meta">
-                            ${item.journal ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>${item.journal}</span>` : ''}
-                            ${item.cited ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>Cited ${item.cited}</span>` : ''}
-                            ${item.published ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>${item.published}</span>` : ''}
-                        </div>
-                    `;
+                    <div class="card-meta">
+                        ${item.journal ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>${item.journal}</span>` : ''}
+                        ${item.cited ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>Cited ${item.cited}</span>` : ''}
+                        ${item.published ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>${item.published}</span>` : ''}
+                    </div>
+                `;
                 }
 
-                const fieldsHTML = (item.field || []).map(f => 
+                const fieldsHTML = (item.field || []).map(f =>
                     `<span class="field-tag">${f}</span>`
                 ).join('');
 
-                // 【更新】根据类型生成不同的详情内容
                 let detailsHTML = '';
                 if (isOrg) {
                     detailsHTML = `
-                        <div class="card-details">
-                            ${item.technologies && item.technologies.length > 0 ? `
-                                <div class="detail-section">
-                                    <h5>Technologies & Products</h5>
-                                    <div class="tech-tags">
-                                        ${item.technologies.map(t => t ? `<span class="tech-tag">${t}</span>` : '').join('')}
-                                    </div>
+                    <div class="card-details">
+                        ${item.technologies && item.technologies.length > 0 ? `
+                            <div class="detail-section">
+                                <h5>Technologies & Products</h5>
+                                <div class="tech-tags">
+                                    ${item.technologies.filter(t => t).map(t => `<span class="tech-tag">${t}</span>`).join('')}
                                 </div>
-                            ` : ''}
-                            ${item.founders && item.founders.length > 0 ? `
-                                <div class="detail-section">
-                                    <h5>Founders</h5>
-                                    <p>${item.founders.join(', ')}</p>
-                                </div>
-                            ` : ''}
-                            ${item.website ? `
-                                <div class="detail-section">
-                                    <h5>Website</h5>
-                                    <a href="${item.website}" target="_blank" class="external-link">${item.website}</a>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
+                            </div>
+                        ` : ''}
+                        ${item.founders && item.founders.length > 0 ? `
+                            <div class="detail-section">
+                                <h5>Founders</h5>
+                                <p>${item.founders.filter(f => f).join(', ')}</p>
+                            </div>
+                        ` : ''}
+                        ${item.website ? `
+                            <div class="detail-section">
+                                <h5>Website</h5>
+                                <a href="${item.website}" target="_blank" rel="noopener noreferrer" class="external-link">${item.website}</a>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
                 } else if (isPeople) {
                     detailsHTML = `
-                        <div class="card-details">
-                            ${item.organizations && item.organizations.length > 0 ? `
-                                <div class="detail-section">
-                                    <h5>Organizations</h5>
-                                    <div class="tech-tags">
-                                        ${item.organizations.map(org => `<span class="tech-tag">${org}</span>`).join('')}
-                                    </div>
+                    <div class="card-details">
+                        ${item.organizations && item.organizations.length > 0 ? `
+                            <div class="detail-section">
+                                <h5>Organizations</h5>
+                                <div class="tech-tags">
+                                    ${item.organizations.filter(o => o).map(org => `<span class="tech-tag">${org}</span>`).join('')}
                                 </div>
-                            ` : ''}
-                            ${item.papers && item.papers.length > 0 ? `
-                                <div class="detail-section">
-                                    <h5>Key Papers</h5>
-                                    <ul class="feature-list">
-                                        ${item.papers.filter(p => p).map(p => `<li>${p}</li>`).join('')}
-                                    </ul>
-                                </div>
-                            ` : ''}
-                            ${item.link ? `
-                                <div class="detail-section">
-                                    <h5>Profile</h5>
-                                    <a href="${item.link}" target="_blank" class="external-link">View Profile</a>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
+                            </div>
+                        ` : ''}
+                        ${item.papers && item.papers.length > 0 ? `
+                            <div class="detail-section">
+                                <h5>Key Papers</h5>
+                                <ul class="feature-list">
+                                    ${item.papers.filter(p => p).slice(0, 3).map(p => `<li>${p}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        ${item.link ? `
+                            <div class="detail-section">
+                                <h5>Profile</h5>
+                                <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="external-link">View Profile</a>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
                 } else if (isProduct) {
                     detailsHTML = `
-                        <div class="card-details">
-                            ${item.features && item.features !== 'Array' ? `
-                                <div class="detail-section">
-                                    <h5>Features</h5>
-                                    <p>${item.features}</p>
-                                </div>
-                            ` : ''}
-                            ${item.org_id ? `
-                                <div class="detail-section">
-                                    <h5>Developed By</h5>
-                                    <p>${item.org_id}</p>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
+                    <div class="card-details">
+                        ${item.features && item.features !== 'Array' && item.features.length > 0 ? `
+                            <div class="detail-section">
+                                <h5>Features</h5>
+                                <ul class="feature-list">
+                                    ${Array.isArray(item.features) ? item.features.filter(f => f).map(f => `<li>${f}</li>`).join('') : `<li>${item.features}</li>`}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        ${item.developer ? `
+                            <div class="detail-section">
+                                <h5>Developer</h5>
+                                <p>${item.developer}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
                 } else if (isPaper) {
                     detailsHTML = `
-                        <div class="card-details">
-                            ${item.authors && item.authors.length > 0 ? `
-                                <div class="detail-section">
-                                    <h5>Authors (${item.authors.length})</h5>
-                                    <p class="authors-list">${item.authors.slice(0, 5).join(', ')}${item.authors.length > 5 ? ` and ${item.authors.length - 5} more` : ''}</p>
-                                </div>
-                            ` : ''}
-                            ${item.abstract ? `
-                                <div class="detail-section">
-                                    <h5>Abstract</h5>
-                                    <p class="abstract-text">${item.abstract.substring(0, 300)}${item.abstract.length > 300 ? '...' : ''}</p>
-                                </div>
-                            ` : ''}
-                            ${item.doi ? `
-                                <div class="detail-section">
-                                    <h5>DOI</h5>
-                                    <a href="${item.doi}" target="_blank" class="external-link">${item.doi}</a>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
+                    <div class="card-details">
+                        ${item.authors && item.authors.length > 0 ? `
+                            <div class="detail-section">
+                                <h5>Authors (${item.authors.length})</h5>
+                                <p class="authors-list">${item.authors.slice(0, 5).join(', ')}${item.authors.length > 5 ? ` and ${item.authors.length - 5} more` : ''}</p>
+                            </div>
+                        ` : ''}
+                        ${item.abstract ? `
+                            <div class="detail-section">
+                                <h5>Abstract</h5>
+                                <p class="abstract-text">${item.abstract.substring(0, 300)}${item.abstract.length > 300 ? '...' : ''}</p>
+                            </div>
+                        ` : ''}
+                        ${item.doi ? `
+                            <div class="detail-section">
+                                <h5>DOI</h5>
+                                <a href="${item.doi}" target="_blank" rel="noopener noreferrer" class="external-link">${item.doi}</a>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
                 }
 
                 const displayName = item.name || item.title || 'Untitled';
                 const displayDesc = item.description || item.abstract || '';
 
                 return `
-                    <article class="db-card" data-type="${item.type}">
-                        <div class="card-header">
-                            <div class="card-icon ${item.type}-icon">
-                                ${isOrg ? 'Org' : isPeople ? 'Ppl' : isProduct ? 'Prd' : 'Ppr'}
-                            </div>
-                            <div class="card-title-group">
-                                <h3 class="card-title">${displayName}</h3>
-                                <div class="card-fields">${fieldsHTML}</div>
-                            </div>
-                            <button class="card-expand-btn" aria-label="Expand details">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="6 9 12 15 18 9"></polyline>
-                                </svg>
-                            </button>
+                <article class="db-card" data-type="${item.type}">
+                    <div class="card-header">
+                        <div class="card-icon ${item.type}-icon">
+                            ${isOrg ? 'Org' : isPeople ? 'Ppl' : isProduct ? 'Prd' : 'Ppr'}
                         </div>
-                        <div class="card-body">
-                            <p class="card-description">${displayDesc}</p>
-                            ${metaHTML}
+                        <div class="card-title-group">
+                            <h3 class="card-title">${displayName}</h3>
+                            <div class="card-fields">${fieldsHTML}</div>
                         </div>
-                        <div class="card-expandable">
-                            ${detailsHTML}
-                            <div class="card-actions">
-                                <button class="btn-text">Save to Collection</button>
-                                <button class="btn-text">Share</button>
-                            </div>
+                        <button class="card-expand-btn" aria-label="Expand details">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">${displayDesc}</p>
+                        ${metaHTML}
+                    </div>
+                    <div class="card-expandable">
+                        ${detailsHTML}
+                        <div class="card-actions">
+                            <button class="btn-text" onclick="saveToCollection('${item.id}', '${item.type}')">Save to Collection</button>
+                            <button class="btn-text" onclick="shareItem('${item.id}', '${item.type}')">Share</button>
                         </div>
-                    </article>
-                `;
+                    </div>
+                </article>
+            `;
             }
 
             function updateResultsHeader(count) {
@@ -741,7 +810,7 @@
                     products: 'Products',
                     papers: 'Papers'
                 };
-                
+
                 if (state.searchQuery || state.currentFilter !== 'all') {
                     resultsTitle.textContent = `Search Results`;
                     resultsCount.textContent = `${count} ${tabNames[state.currentTab].toLowerCase()} found`;
@@ -756,36 +825,43 @@
                 if (show) renderFeatured();
             }
 
-            function renderFeatured() {
-                // 【更新】获取每个类别的代表项（前3个）
-                const featured = state.data[state.currentTab].slice(0, 3);
-                featuredGrid.innerHTML = featured.map(item => {
+            async function renderFeatured() {
+                // 从当前表中获取前3条作为 featured
+                const table = tableNames[state.currentTab];
+                const { data } = await supabaseClient
+                    .from(table)
+                    .select('*')
+                    .eq('status', 'active')
+                    .limit(3);
+
+                if (!data || data.length === 0) {
+                    featuredGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No featured items available</p>';
+                    return;
+                }
+
+                const transformed = data.map(item => transformData(item, state.currentTab));
+
+                featuredGrid.innerHTML = transformed.map(item => {
                     const name = item.name || item.title;
                     const desc = item.description || item.abstract || '';
                     return `
-                        <div class="featured-card" onclick="document.getElementById('search-input').value = '${name}'; document.getElementById('search-input').dispatchEvent(new Event('input'));">
-                            <div class="featured-icon">${item.type === 'organization' ? 'Org' : item.type === 'people' ? 'Ppl' : item.type === 'product' ? 'Prd' : 'Ppr'}</div>
-                            <h4>${name}</h4>
-                            <p>${desc.substring(0, 100)}${desc.length > 100 ? '...' : ''}</p>
-                            <span class="featured-link">View Details →</span>
-                        </div>
-                    `;
+                    <div class="featured-card" onclick="document.getElementById('search-input').value = '${name.replace(/'/g, "\\'")}'; document.getElementById('search-input').dispatchEvent(new Event('input'));">
+                        <div class="featured-icon">${item.type === 'organization' ? 'Org' : item.type === 'people' ? 'Ppl' : item.type === 'product' ? 'Prd' : 'Ppr'}</div>
+                        <h4>${name}</h4>
+                        <p>${desc.substring(0, 100)}${desc.length > 100 ? '...' : ''}</p>
+                        <span class="featured-link">View Details →</span>
+                    </div>
+                `;
                 }).join('');
-            }
-
-            function updateStats() {
-                animateNumber('org-count', state.data.organizations.length);
-                animateNumber('people-count', state.data.people.length);
-                animateNumber('product-count', state.data.products.length);
-                animateNumber('paper-count', state.data.papers.length);
             }
 
             function animateNumber(id, target) {
                 const el = document.getElementById(id);
+                if (!el) return;
                 const duration = 2000;
                 const step = target / (duration / 16);
                 let current = 0;
-                
+
                 const update = () => {
                     current += step;
                     if (current < target) {
@@ -797,7 +873,20 @@
                 };
                 update();
             }
+
+            // 全局函数供 onclick 调用
+            window.saveToCollection = function (id, type) {
+                alert(`Saved ${type} ${id} to collection (feature coming soon)`);
+            };
+
+            window.shareItem = function (id, type) {
+                const url = `${window.location.origin}${window.location.pathname}?type=${type}&id=${id}`;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Link copied to clipboard!');
+                });
+            };
         });
     </script>
 </body>
+
 </html>
