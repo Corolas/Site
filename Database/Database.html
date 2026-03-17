@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Permissions-Policy" content="storage-access=*">
     <title>Rhea Database - Corolas | AI × Bio Intelligence</title>
     <link rel="icon" type="image/x-icon" href="../assets/icon/favicon.ico">
     <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- 使用 esm.sh 作为替代 CDN -->
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
+        window.supabaseClient = { createClient };
+    </script>
 </head>
-
 <body>
     <canvas id="bg-canvas"></canvas>
-
+    
     <header class="glass-header">
         <div class="logo">
-            <img src="../assets/icon/corolas-logo-white.png" alt="Corolas">
+            <img src="../assets/icon/android-chrome-512x512.png" alt="Corolas">
             <span class="logo-text">COROLAS</span>
         </div>
         <nav>
@@ -45,27 +47,27 @@
             </div>
             <h1 class="db-title">Intelligence Repository</h1>
             <p class="db-subtitle">
-                Comprehensive mapping of AI × Bio ecosystem.
-                Search organizations, key people, and products shaping the future of biotechnology.
+                Comprehensive mapping of AI × Bio ecosystem. 
+                Search organizations, key people, products and research papers shaping the future of biotechnology.
             </p>
             <div class="db-stats-bar">
                 <div class="db-stat">
-                    <span class="db-stat-num" id="org-count">0</span>
+                    <span class="db-stat-num" id="org-count">-</span>
                     <span class="db-stat-label">Organizations</span>
                 </div>
                 <div class="db-stat-divider"></div>
                 <div class="db-stat">
-                    <span class="db-stat-num" id="people-count">0</span>
+                    <span class="db-stat-num" id="people-count">-</span>
                     <span class="db-stat-label">People</span>
                 </div>
                 <div class="db-stat-divider"></div>
                 <div class="db-stat">
-                    <span class="db-stat-num" id="product-count">0</span>
+                    <span class="db-stat-num" id="product-count">-</span>
                     <span class="db-stat-label">Products</span>
                 </div>
                 <div class="db-stat-divider"></div>
                 <div class="db-stat">
-                    <span class="db-stat-num" id="paper-count">0</span>
+                    <span class="db-stat-num" id="paper-count">-</span>
                     <span class="db-stat-label">Papers</span>
                 </div>
             </div>
@@ -78,7 +80,7 @@
         </div>
     </section>
 
-    <!-- Search Section - 移除 sticky 定位 -->
+    <!-- Search Section -->
     <section class="search-section" id="search">
         <div class="search-container">
             <div class="search-tabs">
@@ -121,8 +123,11 @@
                         <path d="m21 21-4.35-4.35"></path>
                     </svg>
                 </div>
-                <input type="text" class="search-input" id="search-input"
-                    placeholder="Search organizations, companies, labs..." autocomplete="off">
+                <input type="text" 
+                       class="search-input" 
+                       id="search-input" 
+                       placeholder="Search organizations, companies, labs..."
+                       autocomplete="off">
                 <div class="search-shortcut">
                     <kbd>Ctrl</kbd> <kbd>K</kbd>
                 </div>
@@ -143,8 +148,7 @@
                 <button class="filter-chip" data-filter="Genomics & Multi-omics">Genomics & Multi-omics</button>
                 <button class="filter-chip" data-filter="Longevity & Aging">Longevity & Aging</button>
                 <button class="filter-chip" data-filter="Precision Medicine">Precision Medicine</button>
-                <button class="filter-chip" data-filter="Protein & Structural Biology">Protein & Structural
-                    Biology</button>
+                <button class="filter-chip" data-filter="Protein & Structural Biology">Protein & Structural Biology</button>
                 <button class="filter-chip" data-filter="Synthetic Biology">Synthetic Biology</button>
             </div>
         </div>
@@ -154,8 +158,8 @@
     <section class="results-section" id="results">
         <div class="results-header">
             <div class="results-info">
-                <h2 id="results-title">Leading Organizations</h2>
-                <span class="results-count" id="results-count">Loading...</span>
+                <h2 id="results-title">All Entries</h2>
+                <span class="results-count" id="results-count">Initializing...</span>
             </div>
             <div class="results-view-toggle">
                 <button class="view-btn active" data-view="grid" aria-label="Grid view">
@@ -180,17 +184,13 @@
         </div>
 
         <div class="results-grid" id="results-grid">
-            <!-- Loading State -->
             <div class="loading-state" id="loading-state">
                 <div class="loading-spinner"></div>
                 <p>Connecting to Rhea Database...</p>
             </div>
-
-            <!-- Empty State -->
             <div class="empty-state" id="empty-state" style="display: none;">
                 <div class="empty-icon">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="1.5">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <circle cx="11" cy="11" r="8"></circle>
                         <path d="m21 21-4.35-4.35"></path>
                         <path d="M8 8l6 6"></path>
@@ -200,8 +200,6 @@
                 <h3>No results found</h3>
                 <p>Try adjusting your search terms or filters</p>
             </div>
-
-            <!-- Cards will be injected here by JS -->
         </div>
 
         <div class="load-more" id="load-more" style="display: none;">
@@ -209,15 +207,58 @@
         </div>
     </section>
 
-    <!-- Featured Section (shown when no search) -->
+    <!-- Featured Sections -->
     <section class="featured-db-section" id="featured-section">
-        <div class="featured-header">
-            <span class="section-index">Featured</span>
-            <h2>Leading Organizations</h2>
-            <p>Pioneering institutions shaping the AI × Bio landscape</p>
+        <div class="featured-category">
+            <div class="featured-header">
+                <span class="section-index">01</span>
+                <h2>Leading Organizations</h2>
+                <p>Pioneering institutions at the forefront of AI × Bio innovation</p>
+            </div>
+            <div class="featured-grid" id="featured-organizations">
+                <div class="loading-state small">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
         </div>
-        <div class="featured-grid" id="featured-grid">
-            <!-- Featured cards injected by JS -->
+
+        <div class="featured-category">
+            <div class="featured-header">
+                <span class="section-index">02</span>
+                <h2>Important Figures</h2>
+                <p>Key researchers, founders, and leaders shaping the field</p>
+            </div>
+            <div class="featured-grid" id="featured-people">
+                <div class="loading-state small">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="featured-category">
+            <div class="featured-header">
+                <span class="section-index">03</span>
+                <h2>Key Products</h2>
+                <p>Groundbreaking platforms, tools, and technologies</p>
+            </div>
+            <div class="featured-grid" id="featured-products">
+                <div class="loading-state small">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="featured-category">
+            <div class="featured-header">
+                <span class="section-index">04</span>
+                <h2>Significant Papers</h2>
+                <p>Influential research publications driving the field forward</p>
+            </div>
+            <div class="featured-grid papers-grid" id="featured-papers">
+                <div class="loading-state small">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -225,7 +266,7 @@
         <div class="footer-grid">
             <div class="footer-brand">
                 <div class="logo">
-                    <img src="../assets/icon/corolas-logo-white.png" alt="Corolas">
+                    <img src="../assets/icon/android-chrome-512x512.png" alt="Corolas">
                     <span>COROLAS</span>
                 </div>
                 <p>Mapping the Frontiers of AI in Biotechnology</p>
@@ -261,594 +302,385 @@
         </div>
     </footer>
 
-    <script>
-        // Supabase 配置
+    <script type="module">
+        // Supabase Configuration
         const SUPABASE_URL = 'https://utfcnjaspqklrirxpwlg.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0ZmNuamFzcHFrbHJpcnhwd2xnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxMDQ3NDgsImV4cCI6MjA4ODY4MDc0OH0.hoeWKwGpDhVjO60sQxtkzH26Nq7a0b0IeW-u_4ctKGY';
-
-        // Field 分类常量
-        const FIELD_CATEGORIES = [
-            "Agriculture & Food",
-            "Diagnostics & Imaging",
-            "Drug Discovery",
-            "Genomics & Multi-omics",
-            "Longevity & Aging",
-            "Precision Medicine",
-            "Protein & Structural Biology",
-            "Synthetic Biology"
-        ];
-
-        // Database Page Specific Logic
-        document.addEventListener('DOMContentLoaded', () => {
-            // State management
-            const state = {
-                currentTab: 'organizations',
-                currentFilter: 'all',
-                searchQuery: '',
-                viewMode: 'grid',
-                data: {
-                    organizations: [],
-                    people: [],
-                    products: [],
-                    papers: []
+        const SUPABASE_KEY = 'sb_publishable_KhL5BB287kmaFplwyF5nTg_VFM2OWRp';
+        
+        // Initialize Supabase client using ES module
+        let supabase;
+        try {
+            supabase = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: {
+                    persistSession: false,
+                    autoRefreshToken: false
                 },
-                loading: true,
-                page: 0,
-                pageSize: 20,
-                hasMore: true
-            };
+                global: {
+                    headers: {
+                        'X-Client-Info': 'rhea-database'
+                    }
+                }
+            });
+            console.log('Supabase client initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize Supabase:', error);
+            showFatalError('Database connection failed. Please check your internet connection and refresh.');
+        }
 
-            // DOM Elements
-            const searchInput = document.getElementById('search-input');
-            const searchClear = document.getElementById('search-clear');
-            const searchTabs = document.querySelectorAll('.search-tab');
-            const filterChips = document.querySelectorAll('.filter-chip');
-            const viewBtns = document.querySelectorAll('.view-btn');
-            const resultsGrid = document.getElementById('results-grid');
-            const resultsTitle = document.getElementById('results-title');
-            const resultsCount = document.getElementById('results-count');
-            const loadingState = document.getElementById('loading-state');
-            const emptyState = document.getElementById('empty-state');
-            const featuredSection = document.getElementById('featured-section');
-            const featuredGrid = document.getElementById('featured-grid');
-            const loadMoreBtn = document.getElementById('load-more');
+        // Application State
+        const state = {
+            currentTab: 'organizations',
+            currentFilter: 'all',
+            searchQuery: '',
+            viewMode: 'grid',
+            data: {
+                organizations: [],
+                people: [],
+                products: [],
+                papers: []
+            },
+            loading: true,
+            initialized: false
+        };
 
-            // 表名映射
-            const tableNames = {
-                organizations: 'organizations',
-                people: 'people',
-                products: 'products',
-                papers: 'papers'
-            };
+        // DOM Elements
+        const searchInput = document.getElementById('search-input');
+        const searchClear = document.getElementById('search-clear');
+        const searchTabs = document.querySelectorAll('.search-tab');
+        const filterChips = document.querySelectorAll('.filter-chip');
+        const viewBtns = document.querySelectorAll('.view-btn');
+        const resultsGrid = document.getElementById('results-grid');
+        const resultsTitle = document.getElementById('results-title');
+        const resultsCount = document.getElementById('results-count');
+        const loadingState = document.getElementById('loading-state');
+        const emptyState = document.getElementById('empty-state');
+        const featuredSection = document.getElementById('featured-section');
 
-            // Initialize
-            initializeData();
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!supabase) return;
+            
             setupEventListeners();
+            await initializeData();
+        });
 
-            // 【核心】使用纯 fetch 调用 Supabase REST API
-            async function supabaseFetch(table, options = {}) {
-                const {
-                    select = '*',
-                    filters = [],
-                    search = null,
-                    field = 'all',
-                    page = 0,
-                    pageSize = 20,
-                    order = { column: 'id', ascending: true }
-                } = options;
-
-                // 构建 URL
-                let url = new URL(`${SUPABASE_URL}/rest/v1/${table}`);
-
-                // 选择列
-                url.searchParams.set('select', select);
-
-                // 基础过滤：status = active
-                url.searchParams.set('status', 'eq.active');
-
-                // 字段过滤
-                if (field !== 'all') {
-                    url.searchParams.set('field', 'cs.{"' + field + '"}');
-                }
-
-                // 搜索过滤（使用 or）
-                if (search) {
-                    const searchTerm = encodeURIComponent(`%${search}%`);
-                    let orConditions = [];
-
-                    if (table === 'organizations') {
-                        orConditions = [
-                            `id.ilike.${searchTerm}`,
-                            `official_name.ilike.${searchTerm}`,
-                            `description.ilike.${searchTerm}`
-                        ];
-                    } else if (table === 'people') {
-                        orConditions = [
-                            `name.ilike.${searchTerm}`,
-                            `description.ilike.${searchTerm}`,
-                            `position.ilike.${searchTerm}`
-                        ];
-                    } else if (table === 'products') {
-                        orConditions = [
-                            `id.ilike.${searchTerm}`,
-                            `description.ilike.${searchTerm}`,
-                            `type.ilike.${searchTerm}`
-                        ];
-                    } else if (table === 'papers') {
-                        orConditions = [
-                            `title.ilike.${searchTerm}`,
-                            `abstract.ilike.${searchTerm}`,
-                            `journal.ilike.${searchTerm}`
-                        ];
-                    }
-
-                    url.searchParams.set('or', '(' + orConditions.join(',') + ')');
-                }
-
-                // 排序
-                url.searchParams.set('order', `${order.column}.${order.ascending ? 'asc' : 'desc'}`);
-
-                // 分页
-                const from = page * pageSize;
-                const to = from + pageSize - 1;
-                url.searchParams.set('offset', from);
-                url.searchParams.set('limit', pageSize);
-
-                // 获取总数（使用 head 请求）
-                const countUrl = new URL(url);
-                countUrl.searchParams.set('select', '*');
-
-                try {
-                    // 并行执行数据获取和计数
-                    const [dataRes, countRes] = await Promise.all([
-                        fetch(url, {
-                            headers: {
-                                'apikey': SUPABASE_KEY,
-                                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                                'Content-Type': 'application/json',
-                                'Prefer': 'return=representation'
-                            }
-                        }),
-                        fetch(countUrl, {
-                            method: 'HEAD',
-                            headers: {
-                                'apikey': SUPABASE_KEY,
-                                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                                'Prefer': 'count=exact'
-                            }
-                        })
-                    ]);
-
-                    if (!dataRes.ok) {
-                        throw new Error(`HTTP error! status: ${dataRes.status}`);
-                    }
-
-                    const data = await dataRes.json();
-                    const count = parseInt(countRes.headers.get('content-range')?.split('/')[1] || '0');
-
-                    return {
-                        data: data || [],
-                        count: count,
-                        hasMore: (page + 1) * pageSize < count
-                    };
-                } catch (error) {
-                    console.error('Supabase fetch error:', error);
-                    return { data: [], count: 0, hasMore: false };
-                }
-            }
-
-            // 获取统计数据（使用 head 请求）
-            async function getCount(table) {
-                try {
-                    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*&status=eq.active`, {
-                        method: 'HEAD',
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`,
-                            'Prefer': 'count=exact'
-                        }
-                    });
-                    return parseInt(res.headers.get('content-range')?.split('/')[1] || '0');
-                } catch (e) {
-                    return 0;
-                }
-            }
-
-            async function initializeData() {
-                // 加载统计数据
-                const [orgCount, peopleCount, productCount, paperCount] = await Promise.all([
-                    getCount('organizations'),
-                    getCount('people'),
-                    getCount('products'),
-                    getCount('papers')
+        async function initializeData() {
+            try {
+                resultsCount.textContent = 'Loading data...';
+                
+                // Fetch all data in parallel with error handling for each
+                const [orgsResult, peopleResult, productsResult, papersResult] = await Promise.all([
+                    fetchOrganizations().catch(e => { console.error('Orgs error:', e); return []; }),
+                    fetchPeople().catch(e => { console.error('People error:', e); return []; }),
+                    fetchProducts().catch(e => { console.error('Products error:', e); return []; }),
+                    fetchPapers().catch(e => { console.error('Papers error:', e); return []; })
                 ]);
 
-                animateNumber('org-count', orgCount);
-                animateNumber('people-count', peopleCount);
-                animateNumber('product-count', productCount);
-                animateNumber('paper-count', paperCount);
-
+                state.data.organizations = orgsResult;
+                state.data.people = peopleResult;
+                state.data.products = productsResult;
+                state.data.papers = papersResult;
+                
                 state.loading = false;
+                state.initialized = true;
 
-                // 加载第一页数据
-                await performSearch();
-                renderFeatured();
+                // Update UI
+                updateStats();
+                renderAllFeatured();
+                performSearch();
+                
+                // Hide main loading state
+                if (loadingState) loadingState.style.display = 'none';
+                
+                console.log('Data loaded:', {
+                    orgs: state.data.organizations.length,
+                    people: state.data.people.length,
+                    products: state.data.products.length,
+                    papers: state.data.papers.length
+                });
+                
+            } catch (error) {
+                console.error('Error initializing data:', error);
+                showError('Failed to load database. Please refresh the page.');
             }
+        }
 
-            function setupEventListeners() {
-                // Tab switching
-                searchTabs.forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        searchTabs.forEach(t => t.classList.remove('active'));
-                        tab.classList.add('active');
-                        state.currentTab = tab.dataset.tab;
-                        state.page = 0;
-                        state.hasMore = true;
-                        updateSearchPlaceholder();
-                        performSearch();
-                    });
+        // Supabase Fetch Functions with retry logic
+        async function fetchWithRetry(fetchFn, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    return await fetchFn();
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+                }
+            }
+        }
+
+        async function fetchOrganizations() {
+            const { data, error } = await supabase
+                .from('organizations')
+                .select('*')
+                .eq('status', 'active')
+                .limit(100);
+            
+            if (error) throw error;
+            return (data || []).map(org => ({
+                ...org,
+                type: 'organization',
+                field: parseField(org.field),
+                founders: parseArray(org.founders),
+                technologies_and_products: parseArray(org.technologies_and_products)
+            }));
+        }
+
+        async function fetchPeople() {
+            const { data, error } = await supabase
+                .from('people')
+                .select('*')
+                .eq('status', 'active')
+                .limit(100);
+            
+            if (error) throw error;
+            return (data || []).map(person => ({
+                ...person,
+                type: 'people',
+                field: parseField(person.field),
+                org_id: parseArray(person.org_id),
+                features: parseArray(person.features),
+                paper_title: parseArray(person.paper_title)
+            })).filter(p => p.name); // Filter out entries without names
+        }
+
+        async function fetchProducts() {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .eq('status', 'active')
+                .limit(100);
+            
+            if (error) throw error;
+            return (data || []).map(product => ({
+                ...product,
+                type: 'product',
+                field: parseField(product.field),
+                features: parseArray(product.features)
+            })).filter(p => p.pro_id); // Filter out entries without IDs
+        }
+
+        async function fetchPapers() {
+            const { data, error } = await supabase
+                .from('papers')
+                .select('*')
+                .eq('status', 'active')
+                .limit(100);
+            
+            if (error) throw error;
+            return (data || []).map(paper => ({
+                ...paper,
+                type: 'paper',
+                field: parseField(paper.field),
+                authors: parseArray(paper.authors)
+            })).filter(p => p.title); // Filter out entries without titles
+        }
+
+        // Helper Functions for Parsing Supabase Data
+        function parseField(field) {
+            if (!field) return [];
+            if (Array.isArray(field)) return field;
+            if (typeof field === 'string') {
+                try {
+                    const parsed = JSON.parse(field);
+                    return Array.isArray(parsed) ? parsed : [field];
+                } catch {
+                    return field.split(/[,;]/).map(f => f.trim()).filter(f => f);
+                }
+            }
+            return [];
+        }
+
+        function parseArray(value) {
+            if (!value) return [];
+            if (Array.isArray(value)) return value;
+            if (typeof value === 'string') {
+                try {
+                    const parsed = JSON.parse(value);
+                    return Array.isArray(parsed) ? parsed : [value];
+                } catch {
+                    return value.split(/[,;]/).map(v => v.trim()).filter(v => v);
+                }
+            }
+            return [];
+        }
+
+        function setupEventListeners() {
+            // Tab switching
+            searchTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    searchTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    state.currentTab = tab.dataset.tab;
+                    updateSearchPlaceholder();
+                    performSearch();
                 });
+            });
 
-                // Search input with debounce
-                let debounceTimer;
-                searchInput.addEventListener('input', (e) => {
-                    clearTimeout(debounceTimer);
-                    debounceTimer = setTimeout(() => {
-                        state.searchQuery = e.target.value.toLowerCase();
-                        state.page = 0;
-                        state.hasMore = true;
-                        toggleClearButton();
-                        performSearch();
-                    }, 300);
-                });
-
-                // Clear button
-                searchClear.addEventListener('click', () => {
-                    searchInput.value = '';
-                    state.searchQuery = '';
-                    state.page = 0;
-                    state.hasMore = true;
+            // Search input with debounce
+            let debounceTimer;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    state.searchQuery = e.target.value.toLowerCase().trim();
                     toggleClearButton();
                     performSearch();
+                }, 300);
+            });
+
+            // Clear button
+            searchClear.addEventListener('click', () => {
+                searchInput.value = '';
+                state.searchQuery = '';
+                toggleClearButton();
+                performSearch();
+                searchInput.focus();
+            });
+
+            // Filters
+            filterChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    filterChips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    state.currentFilter = chip.dataset.filter;
+                    performSearch();
+                });
+            });
+
+            // View toggle
+            viewBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    viewBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.viewMode = btn.dataset.view;
+                    resultsGrid.classList.toggle('list-view', state.viewMode === 'list');
+                });
+            });
+
+            // Keyboard shortcut
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
                     searchInput.focus();
-                });
+                }
+            });
+        }
 
-                // Filters
-                filterChips.forEach(chip => {
-                    chip.addEventListener('click', () => {
-                        filterChips.forEach(c => c.classList.remove('active'));
-                        chip.classList.add('active');
-                        state.currentFilter = chip.dataset.filter;
-                        state.page = 0;
-                        state.hasMore = true;
-                        performSearch();
-                    });
-                });
+        function updateSearchPlaceholder() {
+            const placeholders = {
+                organizations: 'Search organizations, companies, labs...',
+                people: 'Search researchers, founders, scientists...',
+                products: 'Search AI models, platforms, tools...',
+                papers: 'Search papers, publications, research...'
+            };
+            searchInput.placeholder = placeholders[state.currentTab];
+        }
 
-                // View toggle
-                viewBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        viewBtns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        state.viewMode = btn.dataset.view;
-                        resultsGrid.classList.toggle('list-view', state.viewMode === 'list');
-                    });
-                });
+        function toggleClearButton() {
+            searchClear.style.display = state.searchQuery ? 'flex' : 'none';
+        }
 
-                // Load more
-                loadMoreBtn.querySelector('button').addEventListener('click', () => {
-                    loadMore();
-                });
+        function performSearch() {
+            if (!state.initialized) return;
 
-                // Keyboard shortcut
-                document.addEventListener('keydown', (e) => {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                        e.preventDefault();
-                        searchInput.focus();
-                    }
+            const data = state.data[state.currentTab] || [];
+            let filtered = [...data];
+
+            // Apply search filter
+            if (state.searchQuery) {
+                filtered = filtered.filter(item => {
+                    const searchFields = [
+                        item.name || item.title || item.official_name || item.pro_id || '',
+                        item.description || item.abstract || '',
+                        ...(item.field || [])
+                    ].join(' ').toLowerCase();
+                    return searchFields.includes(state.searchQuery);
                 });
             }
 
-            function updateSearchPlaceholder() {
-                const placeholders = {
-                    organizations: 'Search organizations, companies, labs...',
-                    people: 'Search researchers, founders, scientists...',
-                    products: 'Search AI models, platforms, tools...',
-                    papers: 'Search research papers, publications...'
-                };
-                searchInput.placeholder = placeholders[state.currentTab];
+            // Apply field filter
+            if (state.currentFilter !== 'all') {
+                filtered = filtered.filter(item => 
+                    item.field && item.field.some(f => 
+                        f.toLowerCase().includes(state.currentFilter.toLowerCase())
+                    )
+                );
             }
 
-            function toggleClearButton() {
-                searchClear.style.display = state.searchQuery ? 'flex' : 'none';
+            renderResults(filtered);
+            updateResultsHeader(filtered.length);
+            
+            // Show/hide featured sections based on search
+            const isSearching = state.searchQuery !== '' || state.currentFilter !== 'all';
+            featuredSection.style.display = isSearching ? 'none' : 'block';
+            
+            // Scroll to results if searching
+            if (isSearching) {
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function renderResults(items) {
+            if (items.length === 0) {
+                resultsGrid.innerHTML = '';
+                resultsGrid.appendChild(emptyState);
+                emptyState.style.display = 'flex';
+                return;
             }
 
-            async function performSearch(isLoadMore = false) {
-                if (state.loading && !isLoadMore) return;
+            emptyState.style.display = 'none';
+            resultsGrid.innerHTML = items.map(item => createCardHTML(item)).join('');
 
-                if (!isLoadMore) {
-                    loadingState.style.display = 'flex';
-                    resultsGrid.innerHTML = '';
-                    resultsGrid.appendChild(loadingState);
-                }
-
-                const table = tableNames[state.currentTab];
-                const { data, count, hasMore } = await supabaseFetch(table, {
-                    search: state.searchQuery,
-                    field: state.currentFilter,
-                    page: state.page,
-                    pageSize: state.pageSize
-                });
-
-                state.hasMore = hasMore;
-                loadMoreBtn.style.display = hasMore ? 'block' : 'none';
-
-                if (!isLoadMore) {
-                    loadingState.style.display = 'none';
-                }
-
-                if (data.length === 0 && !isLoadMore) {
-                    resultsGrid.innerHTML = '';
-                    resultsGrid.appendChild(emptyState);
-                    emptyState.style.display = 'flex';
-                    updateResultsHeader(0);
-                    toggleFeaturedSection(state.searchQuery === '' && state.currentFilter === 'all');
-                    return;
-                }
-
-                emptyState.style.display = 'none';
-                toggleFeaturedSection(false);
-
-                // 转换数据格式
-                const transformedData = data.map(item => transformData(item, state.currentTab));
-
-                if (isLoadMore) {
-                    // 追加到现有内容
-                    const newCards = transformedData.map(item => createCardHTML(item)).join('');
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = newCards;
-                    while (tempDiv.firstChild) {
-                        resultsGrid.appendChild(tempDiv.firstChild);
-                    }
-                } else {
-                    resultsGrid.innerHTML = transformedData.map(item => createCardHTML(item)).join('');
-                }
-
-                // 添加展开功能
-                document.querySelectorAll('.card-expand-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const card = e.target.closest('.db-card');
-                        card.classList.toggle('expanded');
-                        const icon = btn.querySelector('svg');
+            // Add expand functionality
+            document.querySelectorAll('.card-expand-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const card = e.target.closest('.db-card');
+                    card.classList.toggle('expanded');
+                    const icon = btn.querySelector('svg');
+                    if (icon) {
                         icon.style.transform = card.classList.contains('expanded') ? 'rotate(180deg)' : '';
-                    });
+                    }
                 });
+            });
+        }
 
-                updateResultsHeader(count);
+        function createCardHTML(item) {
+            const type = item.type;
+            
+            switch(type) {
+                case 'organization':
+                    return createOrganizationCard(item);
+                case 'people':
+                    return createPeopleCard(item);
+                case 'product':
+                    return createProductCard(item);
+                case 'paper':
+                    return createPaperCard(item);
+                default:
+                    return '';
             }
+        }
 
-            async function loadMore() {
-                if (!state.hasMore) return;
-                state.page++;
-                await performSearch(true);
-            }
+        function createOrganizationCard(org) {
+            const fieldsHTML = (org.field || []).map(f => `<span class="field-tag">${f}</span>`).join('');
+            const techsHTML = (org.technologies_and_products || []).slice(0, 3).map(t => 
+                `<span class="tech-tag">${t}</span>`
+            ).join('');
 
-            // 转换 Supabase 数据为前端格式
-            function transformData(item, type) {
-                if (type === 'organizations') {
-                    return {
-                        id: item.id,
-                        name: item.id,
-                        official_name: item.official_name,
-                        description: item.description,
-                        field: item.field || [],
-                        category: item.category,
-                        role: item.role,
-                        founders: item.founders,
-                        founded: item.founded_date,
-                        location: item.location,
-                        website: item.website,
-                        market_cap: item.market_cap,
-                        technologies: item.technologies,
-                        status: item.status,
-                        type: 'organization'
-                    };
-                } else if (type === 'people') {
-                    return {
-                        id: item.id,
-                        name: item.name,
-                        degree: item.academic_degree,
-                        description: item.description,
-                        field: item.field || [],
-                        position: item.position,
-                        organizations: item.org_ids,
-                        papers: item.paper_titles,
-                        link: item.link,
-                        status: item.status,
-                        type: 'people'
-                    };
-                } else if (type === 'products') {
-                    return {
-                        id: item.id,
-                        name: item.id,
-                        description: item.description,
-                        field: item.field || [],
-                        type: item.type,
-                        developer: item.developer,
-                        org_id: item.org_id,
-                        features: item.features,
-                        status: item.status,
-                        type: 'product'
-                    };
-                } else if (type === 'papers') {
-                    return {
-                        id: item.id,
-                        title: item.title,
-                        abstract: item.abstract,
-                        field: item.field || [],
-                        authors: item.authors,
-                        journal: item.journal,
-                        cited: item.cited,
-                        published: item.published_date,
-                        doi: item.doi,
-                        status: item.status,
-                        type: 'paper'
-                    };
-                }
-            }
-
-            function createCardHTML(item) {
-                const isOrg = item.type === 'organization';
-                const isPeople = item.type === 'people';
-                const isProduct = item.type === 'product';
-                const isPaper = item.type === 'paper';
-
-                let metaHTML = '';
-                if (isOrg) {
-                    metaHTML = `
-                    <div class="card-meta">
-                        ${item.location ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>${item.location}</span>` : ''}
-                        ${item.founded ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Founded ${item.founded}</span>` : ''}
-                        ${item.category ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>${item.category}</span>` : ''}
-                    </div>
-                `;
-                } else if (isPeople) {
-                    metaHTML = `
-                    <div class="card-meta">
-                        ${item.position ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>${item.position}</span>` : ''}
-                        ${item.organizations && item.organizations.length > 0 ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>${item.organizations[0]}</span>` : ''}
-                        ${item.degree ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>${item.degree}</span>` : ''}
-                    </div>
-                `;
-                } else if (isProduct) {
-                    metaHTML = `
-                    <div class="card-meta">
-                        ${item.type ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>${item.type}</span>` : ''}
-                        ${item.org_id ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>${item.org_id}</span>` : ''}
-                    </div>
-                `;
-                } else if (isPaper) {
-                    metaHTML = `
-                    <div class="card-meta">
-                        ${item.journal ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>${item.journal}</span>` : ''}
-                        ${item.cited ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>Cited ${item.cited}</span>` : ''}
-                        ${item.published ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>${item.published}</span>` : ''}
-                    </div>
-                `;
-                }
-
-                const fieldsHTML = (item.field || []).map(f =>
-                    `<span class="field-tag">${f}</span>`
-                ).join('');
-
-                let detailsHTML = '';
-                if (isOrg) {
-                    detailsHTML = `
-                    <div class="card-details">
-                        ${item.technologies && item.technologies.length > 0 ? `
-                            <div class="detail-section">
-                                <h5>Technologies & Products</h5>
-                                <div class="tech-tags">
-                                    ${item.technologies.filter(t => t).map(t => `<span class="tech-tag">${t}</span>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-                        ${item.founders && item.founders.length > 0 ? `
-                            <div class="detail-section">
-                                <h5>Founders</h5>
-                                <p>${item.founders.filter(f => f).join(', ')}</p>
-                            </div>
-                        ` : ''}
-                        ${item.website ? `
-                            <div class="detail-section">
-                                <h5>Website</h5>
-                                <a href="${item.website}" target="_blank" rel="noopener noreferrer" class="external-link">${item.website}</a>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-                } else if (isPeople) {
-                    detailsHTML = `
-                    <div class="card-details">
-                        ${item.organizations && item.organizations.length > 0 ? `
-                            <div class="detail-section">
-                                <h5>Organizations</h5>
-                                <div class="tech-tags">
-                                    ${item.organizations.filter(o => o).map(org => `<span class="tech-tag">${org}</span>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-                        ${item.papers && item.papers.length > 0 ? `
-                            <div class="detail-section">
-                                <h5>Key Papers</h5>
-                                <ul class="feature-list">
-                                    ${item.papers.filter(p => p).slice(0, 3).map(p => `<li>${p}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                        ${item.link ? `
-                            <div class="detail-section">
-                                <h5>Profile</h5>
-                                <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="external-link">View Profile</a>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-                } else if (isProduct) {
-                    detailsHTML = `
-                    <div class="card-details">
-                        ${item.features && item.features !== 'Array' && item.features.length > 0 ? `
-                            <div class="detail-section">
-                                <h5>Features</h5>
-                                <ul class="feature-list">
-                                    ${Array.isArray(item.features) ? item.features.filter(f => f).map(f => `<li>${f}</li>`).join('') : `<li>${item.features}</li>`}
-                                </ul>
-                            </div>
-                        ` : ''}
-                        ${item.developer ? `
-                            <div class="detail-section">
-                                <h5>Developer</h5>
-                                <p>${item.developer}</p>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-                } else if (isPaper) {
-                    detailsHTML = `
-                    <div class="card-details">
-                        ${item.authors && item.authors.length > 0 ? `
-                            <div class="detail-section">
-                                <h5>Authors (${item.authors.length})</h5>
-                                <p class="authors-list">${item.authors.slice(0, 5).join(', ')}${item.authors.length > 5 ? ` and ${item.authors.length - 5} more` : ''}</p>
-                            </div>
-                        ` : ''}
-                        ${item.abstract ? `
-                            <div class="detail-section">
-                                <h5>Abstract</h5>
-                                <p class="abstract-text">${item.abstract.substring(0, 300)}${item.abstract.length > 300 ? '...' : ''}</p>
-                            </div>
-                        ` : ''}
-                        ${item.doi ? `
-                            <div class="detail-section">
-                                <h5>DOI</h5>
-                                <a href="${item.doi}" target="_blank" rel="noopener noreferrer" class="external-link">${item.doi}</a>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-                }
-
-                const displayName = item.name || item.title || 'Untitled';
-                const displayDesc = item.description || item.abstract || '';
-
-                return `
-                <article class="db-card" data-type="${item.type}">
+            return `
+                <article class="db-card" data-type="organization">
                     <div class="card-header">
-                        <div class="card-icon ${item.type}-icon">
-                            ${isOrg ? 'Org' : isPeople ? 'Ppl' : isProduct ? 'Prd' : 'Ppr'}
-                        </div>
+                        <div class="card-icon organization-icon">Org</div>
                         <div class="card-title-group">
-                            <h3 class="card-title">${displayName}</h3>
+                            <h3 class="card-title">${org.official_name || org.org_id || 'Unknown'}</h3>
                             <div class="card-fields">${fieldsHTML}</div>
                         </div>
                         <button class="card-expand-btn" aria-label="Expand details">
@@ -858,99 +690,437 @@
                         </button>
                     </div>
                     <div class="card-body">
-                        <p class="card-description">${displayDesc}</p>
-                        ${metaHTML}
+                        <p class="card-description">${org.description || 'No description available.'}</p>
+                        <div class="card-meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                ${org.location || 'Location unknown'}
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                Founded ${org.founded_date || 'N/A'}
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                ${org.market_cap || 'N/A'}
+                            </span>
+                        </div>
                     </div>
                     <div class="card-expandable">
-                        ${detailsHTML}
+                        <div class="card-details">
+                            <div class="detail-section">
+                                <h5>Category</h5>
+                                <p>${org.organization_category || 'N/A'}</p>
+                            </div>
+                            <div class="detail-section">
+                                <h5>Role</h5>
+                                <p>${org.role || 'N/A'}</p>
+                            </div>
+                            <div class="detail-section">
+                                <h5>Founders</h5>
+                                <p>${(org.founders || []).join(', ') || 'N/A'}</p>
+                            </div>
+                            <div class="detail-section">
+                                <h5>Technologies</h5>
+                                <div class="tech-tags">${techsHTML || 'N/A'}</div>
+                            </div>
+                        </div>
                         <div class="card-actions">
-                            <button class="btn-text" onclick="saveToCollection('${item.id}', '${item.type}')">Save to Collection</button>
-                            <button class="btn-text" onclick="shareItem('${item.id}', '${item.type}')">Share</button>
+                            ${org.website ? `<a href="${org.website}" target="_blank" rel="noopener" class="btn-text">Visit Website →</a>` : ''}
                         </div>
                     </div>
                 </article>
             `;
-            }
+        }
 
-            function updateResultsHeader(count) {
-                const tabNames = {
-                    organizations: 'Organizations',
-                    people: 'People',
-                    products: 'Products',
-                    papers: 'Papers'
-                };
+        function createPeopleCard(person) {
+            const fieldsHTML = (person.field || []).map(f => `<span class="field-tag">${f}</span>`).join('');
+            const orgsHTML = (person.org_id || []).join(', ');
 
-                if (state.searchQuery || state.currentFilter !== 'all') {
-                    resultsTitle.textContent = `Search Results`;
-                    resultsCount.textContent = `${count} ${tabNames[state.currentTab].toLowerCase()} found`;
-                } else {
-                    resultsTitle.textContent = `All ${tabNames[state.currentTab]}`;
-                    resultsCount.textContent = `${count} entries in database`;
-                }
-            }
-
-            function toggleFeaturedSection(show) {
-                featuredSection.style.display = show ? 'block' : 'none';
-                if (show) renderFeatured();
-            }
-
-            async function renderFeatured() {
-                const table = tableNames[state.currentTab];
-                const { data } = await supabaseFetch(table, { pageSize: 3 });
-
-                if (!data || data.length === 0) {
-                    featuredGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No featured items available</p>';
-                    return;
-                }
-
-                const transformed = data.map(item => transformData(item, state.currentTab));
-
-                featuredGrid.innerHTML = transformed.map(item => {
-                    const name = item.name || item.title;
-                    const desc = item.description || item.abstract || '';
-                    return `
-                    <div class="featured-card" onclick="document.getElementById('search-input').value = '${name.replace(/'/g, "\\'")}'; document.getElementById('search-input').dispatchEvent(new Event('input'));">
-                        <div class="featured-icon">${item.type === 'organization' ? 'Org' : item.type === 'people' ? 'Ppl' : item.type === 'product' ? 'Prd' : 'Ppr'}</div>
-                        <h4>${name}</h4>
-                        <p>${desc.substring(0, 100)}${desc.length > 100 ? '...' : ''}</p>
-                        <span class="featured-link">View Details →</span>
+            return `
+                <article class="db-card" data-type="people">
+                    <div class="card-header">
+                        <div class="card-icon people-icon">Ppl</div>
+                        <div class="card-title-group">
+                            <h3 class="card-title">${person.name}</h3>
+                            <div class="card-fields">${fieldsHTML}</div>
+                        </div>
+                        <button class="card-expand-btn" aria-label="Expand details">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
                     </div>
-                `;
-                }).join('');
-            }
+                    <div class="card-body">
+                        <p class="card-description">${person.description || 'No description available.'}</p>
+                        <div class="card-meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                ${person.position || 'Position unknown'}
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                                </svg>
+                                ${orgsHTML || 'Organization unknown'}
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                ${person.academic_degree || 'N/A'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-expandable">
+                        <div class="card-details">
+                            <div class="detail-section">
+                                <h5>Notable Papers</h5>
+                                <ul class="feature-list">
+                                    ${(person.paper_title || []).filter(p => p).slice(0, 3).map(p => `<li>${p}</li>`).join('') || '<li>No papers listed</li>'}
+                                </ul>
+                            </div>
+                            <div class="detail-section">
+                                <h5>Key Features</h5>
+                                <div class="tech-tags">
+                                    ${(person.features || []).filter(f => f).map(f => `<span class="tech-tag">${f}</span>`).join('') || 'N/A'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            ${person.link ? `<a href="${person.link}" target="_blank" rel="noopener" class="btn-text">View Profile →</a>` : ''}
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
 
-            function animateNumber(id, target) {
-                const el = document.getElementById(id);
-                if (!el) return;
-                const duration = 2000;
-                const step = target / (duration / 16);
-                let current = 0;
+        function createProductCard(product) {
+            const fieldsHTML = (product.field || []).map(f => `<span class="field-tag">${f}</span>`).join('');
+            const featuresHTML = (product.features || []).filter(f => f).slice(0, 3).map(f => 
+                `<li>${f}</li>`
+            ).join('');
 
-                const update = () => {
-                    current += step;
-                    if (current < target) {
-                        el.textContent = Math.floor(current);
-                        requestAnimationFrame(update);
-                    } else {
-                        el.textContent = target;
-                    }
-                };
-                update();
-            }
+            return `
+                <article class="db-card" data-type="product">
+                    <div class="card-header">
+                        <div class="card-icon product-icon">Prd</div>
+                        <div class="card-title-group">
+                            <h3 class="card-title">${product.pro_id || 'Unknown'}</h3>
+                            <div class="card-fields">${fieldsHTML}</div>
+                        </div>
+                        <button class="card-expand-btn" aria-label="Expand details">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">${product.description || 'No description available.'}</p>
+                        <div class="card-meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                                    <rect x="9" y="9" width="6" height="6"></rect>
+                                    <line x1="9" y1="1" x2="9" y2="4"></line>
+                                    <line x1="15" y1="1" x2="15" y2="4"></line>
+                                </svg>
+                                ${product.type || 'Product'}
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                                </svg>
+                                ${product.developer || product.org_id || 'Unknown developer'}
+                            </span>
+                            <span class="meta-item status-active">Active</span>
+                        </div>
+                    </div>
+                    <div class="card-expandable">
+                        <div class="card-details">
+                            <div class="detail-section">
+                                <h5>Key Features</h5>
+                                <ul class="feature-list">
+                                    ${featuresHTML || '<li>No features listed</li>'}
+                                </ul>
+                            </div>
+                            <div class="detail-section">
+                                <h5>Release Date</h5>
+                                <p>${product.released_date || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
 
-            // 全局函数供 onclick 调用
-            window.saveToCollection = function (id, type) {
-                alert(`Saved ${type} ${id} to collection (feature coming soon)`);
+        function createPaperCard(paper) {
+            const fieldsHTML = (paper.field || []).map(f => `<span class="field-tag">${f}</span>`).join('');
+            const authorsHTML = (paper.authors || []).slice(0, 3).join(', ') + ((paper.authors || []).length > 3 ? ' et al.' : '');
+
+            return `
+                <article class="db-card paper-card" data-type="paper">
+                    <div class="card-header">
+                        <div class="card-icon paper-icon">Ppr</div>
+                        <div class="card-title-group">
+                            <h3 class="card-title">${paper.title || 'Untitled'}</h3>
+                            <div class="card-fields">${fieldsHTML}</div>
+                        </div>
+                        <button class="card-expand-btn" aria-label="Expand details">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">${paper.abstract ? paper.abstract.substring(0, 200) + '...' : 'No abstract available.'}</p>
+                        <div class="card-meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                ${authorsHTML || 'Unknown authors'}
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                </svg>
+                                ${paper.journal || 'Unknown journal'}
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                </svg>
+                                ${paper.Cited || 0} citations
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-expandable">
+                        <div class="card-details">
+                            <div class="detail-section">
+                                <h5>Published</h5>
+                                <p>${paper.published_date || 'N/A'}</p>
+                            </div>
+                            <div class="detail-section">
+                                <h5>All Authors</h5>
+                                <p>${(paper.authors || []).join(', ') || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            ${paper.doi ? `<a href="${paper.doi}" target="_blank" rel="noopener" class="btn-text">View Paper →</a>` : ''}
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
+
+        function updateResultsHeader(count) {
+            const tabNames = {
+                organizations: 'organizations',
+                people: 'people',
+                products: 'products',
+                papers: 'papers'
             };
+            
+            if (state.searchQuery || state.currentFilter !== 'all') {
+                resultsTitle.textContent = `Search Results`;
+                resultsCount.textContent = `${count} ${tabNames[state.currentTab].toLowerCase()} found`;
+            } else {
+                resultsTitle.textContent = `All ${tabNames[state.currentTab]}`;
+                resultsCount.textContent = `${count} entries in database`;
+            }
+        }
 
-            window.shareItem = function (id, type) {
-                const url = `${window.location.origin}${window.location.pathname}?type=${type}&id=${id}`;
-                navigator.clipboard.writeText(url).then(() => {
-                    alert('Link copied to clipboard!');
-                });
+        // Featured Sections Rendering
+        function renderAllFeatured() {
+            renderFeaturedOrganizations();
+            renderFeaturedPeople();
+            renderFeaturedProducts();
+            renderFeaturedPapers();
+        }
+
+        function renderFeaturedOrganizations() {
+            const container = document.getElementById('featured-organizations');
+            const featured = state.data.organizations
+                .filter(org => org.official_name && org.description && org.description.length > 20)
+                .slice(0, 3);
+            
+            if (featured.length === 0) {
+                container.innerHTML = '<p class="no-data">No organizations available</p>';
+                return;
+            }
+            
+            container.innerHTML = featured.map(org => `
+                <div class="featured-card" onclick="quickSearch('${org.official_name.replace(/'/g, "\\'")}')">
+                    <div class="featured-icon org-icon">Org</div>
+                    <h4>${org.official_name}</h4>
+                    <p>${org.description.substring(0, 120)}...</p>
+                    <div class="featured-meta">
+                        <span>${org.location || 'Global'}</span>
+                        <span class="featured-link">View →</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderFeaturedPeople() {
+            const container = document.getElementById('featured-people');
+            const featured = state.data.people
+                .filter(p => p.name && p.description && p.description.length > 20)
+                .slice(0, 3);
+            
+            if (featured.length === 0) {
+                container.innerHTML = '<p class="no-data">No people available</p>';
+                return;
+            }
+            
+            container.innerHTML = featured.map(person => `
+                <div class="featured-card" onclick="quickSearch('${person.name.replace(/'/g, "\\'")}')">
+                    <div class="featured-icon people-icon">Ppl</div>
+                    <h4>${person.name}</h4>
+                    <p>${person.description.substring(0, 120)}...</p>
+                    <div class="featured-meta">
+                        <span>${person.position || 'Researcher'}</span>
+                        <span class="featured-link">View →</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderFeaturedProducts() {
+            const container = document.getElementById('featured-products');
+            const featured = state.data.products
+                .filter(p => p.pro_id && p.description && p.description.length > 10)
+                .slice(0, 3);
+            
+            if (featured.length === 0) {
+                container.innerHTML = '<p class="no-data">No products available</p>';
+                return;
+            }
+            
+            container.innerHTML = featured.map(product => `
+                <div class="featured-card" onclick="quickSearch('${product.pro_id.replace(/'/g, "\\'")}')">
+                    <div class="featured-icon product-icon">Prd</div>
+                    <h4>${product.pro_id}</h4>
+                    <p>${product.description.substring(0, 120)}...</p>
+                    <div class="featured-meta">
+                        <span>${product.type || 'Platform'}</span>
+                        <span class="featured-link">View →</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderFeaturedPapers() {
+            const container = document.getElementById('featured-papers');
+            const featured = state.data.papers
+                .filter(p => p.title && p.abstract && p.abstract.length > 50)
+                .sort((a, b) => (parseInt(b.Cited) || 0) - (parseInt(a.Cited) || 0))
+                .slice(0, 3);
+            
+            if (featured.length === 0) {
+                container.innerHTML = '<p class="no-data">No papers available</p>';
+                return;
+            }
+            
+            container.innerHTML = featured.map(paper => `
+                <div class="featured-card paper-featured" onclick="quickSearch('${paper.title.replace(/'/g, "\\'").substring(0, 30)}')">
+                    <div class="featured-icon paper-icon">Ppr</div>
+                    <h4>${paper.title}</h4>
+                    <p>${paper.abstract.substring(0, 150)}...</p>
+                    <div class="featured-meta">
+                        <span>${paper.journal || 'Journal'}</span>
+                        <span>${paper.Cited || 0} citations</span>
+                        <span class="featured-link">Read →</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Utility function for featured card clicks
+        window.quickSearch = function(query) {
+            searchInput.value = query;
+            state.searchQuery = query.toLowerCase();
+            toggleClearButton();
+            performSearch();
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        function updateStats() {
+            animateNumber('org-count', state.data.organizations.length);
+            animateNumber('people-count', state.data.people.length);
+            animateNumber('product-count', state.data.products.length);
+            animateNumber('paper-count', state.data.papers.length);
+        }
+
+        function animateNumber(id, target) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const update = () => {
+                current += step;
+                if (current < target) {
+                    el.textContent = Math.floor(current);
+                    requestAnimationFrame(update);
+                } else {
+                    el.textContent = target;
+                }
             };
-        });
+            update();
+        }
+
+        function showError(message) {
+            resultsCount.textContent = 'Error loading data';
+            resultsGrid.innerHTML = `
+                <div class="empty-state" style="display: flex; grid-column: 1 / -1;">
+                    <div class="empty-icon" style="color: #ff6b6b;">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                    <button onclick="location.reload()" class="btn-primary" style="margin-top: 20px;">Retry</button>
+                </div>
+            `;
+        }
+
+        function showFatalError(message) {
+            document.body.innerHTML = `
+                <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-primary); color: var(--text-primary); padding: 40px; text-align: center;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">⚠️</div>
+                    <h1 style="margin-bottom: 20px;">Connection Error</h1>
+                    <p style="color: var(--text-secondary); margin-bottom: 30px; max-width: 500px;">${message}</p>
+                    <button onclick="location.reload()" class="btn-primary">Refresh Page</button>
+                </div>
+            `;
+        }
     </script>
 </body>
-
 </html>
