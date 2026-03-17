@@ -324,7 +324,7 @@
                 try {
                     const response = await fetch(`${SUPABASE_URL}${path}`, {
                         headers: {
-                            'APIKEY': `${SUPABASE_ANON_KEY}`,
+                            'Application': `Bearer ${SUPABASE_ANON_KEY}`,
                         }
                     });
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
