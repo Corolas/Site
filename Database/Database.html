@@ -261,14 +261,10 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // Supabase 配置
         const SUPABASE_URL = 'https://utfcnjaspqklrirxpwlg.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_KhL5BB287kmaFplwyF5nTg_VFM2OWRp';
-
-        // 初始化 Supabase 客户端
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Field 分类常量
         const FIELD_CATEGORIES = [
@@ -329,81 +325,154 @@
             initializeData();
             setupEventListeners();
 
-            async function initializeData() {
-                // 并行加载统计数据和第一页数据
-                await Promise.all([
-                    loadStats(),
-                    performSearch()
-                ]);
-                state.loading = false;
-                renderFeatured();
-            }
+            // 【核心】使用纯 fetch 调用 Supabase REST API
+            async function supabaseFetch(table, options = {}) {
+                const {
+                    select = '*',
+                    filters = [],
+                    search = null,
+                    field = 'all',
+                    page = 0,
+                    pageSize = 20,
+                    order = { column: 'id', ascending: true }
+                } = options;
 
-            // 加载统计数据
-            async function loadStats() {
-                const tables = ['organizations', 'people', 'products', 'papers'];
-                const counts = await Promise.all(
-                    tables.map(async (table) => {
-                        const { count, error } = await supabaseClient
-                            .from(table)
-                            .select('*', { count: 'exact', head: true })
-                            .eq('status', 'active');
-                        return { table, count: error ? 0 : count };
-                    })
-                );
+                // 构建 URL
+                let url = new URL(`${SUPABASE_URL}/rest/v1/${table}`);
 
-                counts.forEach(({ table, count }) => {
-                    const elId = table === 'organizations' ? 'org-count' :
-                        table === 'people' ? 'people-count' :
-                            table === 'products' ? 'product-count' : 'paper-count';
-                    animateNumber(elId, count || 0);
-                    state.data[table] = new Array(count); // 预分配，用于 featured 截取
-                });
-            }
+                // 选择列
+                url.searchParams.set('select', select);
 
-            // 从 Supabase 获取数据
-            async function fetchFromSupabase(table, search = '', field = 'all', page = 0) {
-                const from = page * state.pageSize;
-                const to = from + state.pageSize - 1;
-
-                let query = supabaseClient
-                    .from(table)
-                    .select('*', { count: 'exact' })
-                    .eq('status', 'active')
-                    .order('id', { ascending: true })
-                    .range(from, to);
-
-                // 搜索过滤
-                if (search) {
-                    const searchTerm = `%${search}%`;
-                    if (table === 'organizations') {
-                        query = query.or(`id.ilike.${searchTerm},official_name.ilike.${searchTerm},description.ilike.${searchTerm},location.ilike.${searchTerm}`);
-                    } else if (table === 'people') {
-                        query = query.or(`name.ilike.${searchTerm},description.ilike.${searchTerm},position.ilike.${searchTerm}`);
-                    } else if (table === 'products') {
-                        query = query.or(`id.ilike.${searchTerm},description.ilike.${searchTerm},type.ilike.${searchTerm}`);
-                    } else if (table === 'papers') {
-                        query = query.or(`title.ilike.${searchTerm},abstract.ilike.${searchTerm},journal.ilike.${searchTerm}`);
-                    }
-                }
+                // 基础过滤：status = active
+                url.searchParams.set('status', 'eq.active');
 
                 // 字段过滤
                 if (field !== 'all') {
-                    query = query.contains('field', [field]);
+                    url.searchParams.set('field', 'cs.{"' + field + '"}');
                 }
 
-                const { data, error, count } = await query;
+                // 搜索过滤（使用 or）
+                if (search) {
+                    const searchTerm = encodeURIComponent(`%${search}%`);
+                    let orConditions = [];
 
-                if (error) {
-                    console.error('Supabase error:', error);
-                    return { data: [], count: 0 };
+                    if (table === 'organizations') {
+                        orConditions = [
+                            `id.ilike.${searchTerm}`,
+                            `official_name.ilike.${searchTerm}`,
+                            `description.ilike.${searchTerm}`
+                        ];
+                    } else if (table === 'people') {
+                        orConditions = [
+                            `name.ilike.${searchTerm}`,
+                            `description.ilike.${searchTerm}`,
+                            `position.ilike.${searchTerm}`
+                        ];
+                    } else if (table === 'products') {
+                        orConditions = [
+                            `id.ilike.${searchTerm}`,
+                            `description.ilike.${searchTerm}`,
+                            `type.ilike.${searchTerm}`
+                        ];
+                    } else if (table === 'papers') {
+                        orConditions = [
+                            `title.ilike.${searchTerm}`,
+                            `abstract.ilike.${searchTerm}`,
+                            `journal.ilike.${searchTerm}`
+                        ];
+                    }
+
+                    url.searchParams.set('or', '(' + orConditions.join(',') + ')');
                 }
 
-                return {
-                    data: data || [],
-                    count: count || 0,
-                    hasMore: (page + 1) * state.pageSize < count
-                };
+                // 排序
+                url.searchParams.set('order', `${order.column}.${order.ascending ? 'asc' : 'desc'}`);
+
+                // 分页
+                const from = page * pageSize;
+                const to = from + pageSize - 1;
+                url.searchParams.set('offset', from);
+                url.searchParams.set('limit', pageSize);
+
+                // 获取总数（使用 head 请求）
+                const countUrl = new URL(url);
+                countUrl.searchParams.set('select', '*');
+
+                try {
+                    // 并行执行数据获取和计数
+                    const [dataRes, countRes] = await Promise.all([
+                        fetch(url, {
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                'Content-Type': 'application/json',
+                                'Prefer': 'return=representation'
+                            }
+                        }),
+                        fetch(countUrl, {
+                            method: 'HEAD',
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                'Prefer': 'count=exact'
+                            }
+                        })
+                    ]);
+
+                    if (!dataRes.ok) {
+                        throw new Error(`HTTP error! status: ${dataRes.status}`);
+                    }
+
+                    const data = await dataRes.json();
+                    const count = parseInt(countRes.headers.get('content-range')?.split('/')[1] || '0');
+
+                    return {
+                        data: data || [],
+                        count: count,
+                        hasMore: (page + 1) * pageSize < count
+                    };
+                } catch (error) {
+                    console.error('Supabase fetch error:', error);
+                    return { data: [], count: 0, hasMore: false };
+                }
+            }
+
+            // 获取统计数据（使用 head 请求）
+            async function getCount(table) {
+                try {
+                    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*&status=eq.active`, {
+                        method: 'HEAD',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Prefer': 'count=exact'
+                        }
+                    });
+                    return parseInt(res.headers.get('content-range')?.split('/')[1] || '0');
+                } catch (e) {
+                    return 0;
+                }
+            }
+
+            async function initializeData() {
+                // 加载统计数据
+                const [orgCount, peopleCount, productCount, paperCount] = await Promise.all([
+                    getCount('organizations'),
+                    getCount('people'),
+                    getCount('products'),
+                    getCount('papers')
+                ]);
+
+                animateNumber('org-count', orgCount);
+                animateNumber('people-count', peopleCount);
+                animateNumber('product-count', productCount);
+                animateNumber('paper-count', paperCount);
+
+                state.loading = false;
+
+                // 加载第一页数据
+                await performSearch();
+                renderFeatured();
             }
 
             function setupEventListeners() {
@@ -504,12 +573,12 @@
                 }
 
                 const table = tableNames[state.currentTab];
-                const { data, count, hasMore } = await fetchFromSupabase(
-                    table,
-                    state.searchQuery,
-                    state.currentFilter,
-                    state.page
-                );
+                const { data, count, hasMore } = await supabaseFetch(table, {
+                    search: state.searchQuery,
+                    field: state.currentFilter,
+                    page: state.page,
+                    pageSize: state.pageSize
+                });
 
                 state.hasMore = hasMore;
                 loadMoreBtn.style.display = hasMore ? 'block' : 'none';
@@ -530,7 +599,7 @@
                 emptyState.style.display = 'none';
                 toggleFeaturedSection(false);
 
-                // 转换数据格式以适配现有卡片结构
+                // 转换数据格式
                 const transformedData = data.map(item => transformData(item, state.currentTab));
 
                 if (isLoadMore) {
@@ -569,7 +638,7 @@
                 if (type === 'organizations') {
                     return {
                         id: item.id,
-                        name: item.id, // org_id 作为显示名
+                        name: item.id,
                         official_name: item.official_name,
                         description: item.description,
                         field: item.field || [],
@@ -601,7 +670,7 @@
                 } else if (type === 'products') {
                     return {
                         id: item.id,
-                        name: item.id, // pro_id 作为显示名
+                        name: item.id,
                         description: item.description,
                         field: item.field || [],
                         type: item.type,
@@ -826,13 +895,8 @@
             }
 
             async function renderFeatured() {
-                // 从当前表中获取前3条作为 featured
                 const table = tableNames[state.currentTab];
-                const { data } = await supabaseClient
-                    .from(table)
-                    .select('*')
-                    .eq('status', 'active')
-                    .limit(3);
+                const { data } = await supabaseFetch(table, { pageSize: 3 });
 
                 if (!data || data.length === 0) {
                     featuredGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No featured items available</p>';
