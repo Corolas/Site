@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,16 +10,19 @@
     <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <!-- 使用 esm.sh 作为替代 CDN -->
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
         window.supabaseClient = { createClient };
     </script>
 </head>
+
 <body>
     <canvas id="bg-canvas"></canvas>
-    
+
     <header class="glass-header">
         <div class="logo">
             <img src="../assets/icon/corolas-logo-white.png" alt="Corolas">
@@ -47,7 +51,7 @@
             </div>
             <h1 class="db-title">Intelligence Repository</h1>
             <p class="db-subtitle">
-                Comprehensive mapping of AI × Bio ecosystem. 
+                Comprehensive mapping of AI × Bio ecosystem.
                 Search organizations, key people, products and research papers shaping the future of biotechnology.
             </p>
             <div class="db-stats-bar">
@@ -123,11 +127,8 @@
                         <path d="m21 21-4.35-4.35"></path>
                     </svg>
                 </div>
-                <input type="text" 
-                       class="search-input" 
-                       id="search-input" 
-                       placeholder="Search organizations, companies, labs..."
-                       autocomplete="off">
+                <input type="text" class="search-input" id="search-input"
+                    placeholder="Search organizations, companies, labs..." autocomplete="off">
                 <div class="search-shortcut">
                     <kbd>Ctrl</kbd> <kbd>K</kbd>
                 </div>
@@ -148,7 +149,8 @@
                 <button class="filter-chip" data-filter="Genomics & Multi-omics">Genomics & Multi-omics</button>
                 <button class="filter-chip" data-filter="Longevity & Aging">Longevity & Aging</button>
                 <button class="filter-chip" data-filter="Precision Medicine">Precision Medicine</button>
-                <button class="filter-chip" data-filter="Protein & Structural Biology">Protein & Structural Biology</button>
+                <button class="filter-chip" data-filter="Protein & Structural Biology">Protein & Structural
+                    Biology</button>
                 <button class="filter-chip" data-filter="Synthetic Biology">Synthetic Biology</button>
             </div>
         </div>
@@ -190,7 +192,8 @@
             </div>
             <div class="empty-state" id="empty-state" style="display: none;">
                 <div class="empty-icon">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
                         <circle cx="11" cy="11" r="8"></circle>
                         <path d="m21 21-4.35-4.35"></path>
                         <path d="M8 8l6 6"></path>
@@ -203,7 +206,7 @@
         </div>
 
         <div class="load-more" id="load-more" style="display: none;">
-            <button class="btn-secondary">Load More</button>
+             <!-- Load more button will be injected here -->
         </div>
     </section>
 
@@ -306,7 +309,7 @@
         // Supabase Configuration
         const SUPABASE_URL = 'https://utfcnjaspqklrirxpwlg.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_KhL5BB287kmaFplwyF5nTg_VFM2OWRp';
-        
+
         // Initialize Supabase client using ES module
         let supabase;
         try {
@@ -339,6 +342,11 @@
                 products: [],
                 papers: []
             },
+            pagination: {
+                itemsPerPage: 6,
+                currentPage: 1,
+                totalItems: 0
+            },
             loading: true,
             initialized: false
         };
@@ -359,7 +367,7 @@
         // Initialize Application
         document.addEventListener('DOMContentLoaded', async () => {
             if (!supabase) return;
-            
+
             setupEventListeners();
             await initializeData();
         });
@@ -367,7 +375,7 @@
         async function initializeData() {
             try {
                 resultsCount.textContent = 'Loading data...';
-                
+
                 // Fetch all data in parallel with error handling for each
                 const [orgsResult, peopleResult, productsResult, papersResult] = await Promise.all([
                     fetchOrganizations().catch(e => { console.error('Orgs error:', e); return []; }),
@@ -380,7 +388,7 @@
                 state.data.people = peopleResult;
                 state.data.products = productsResult;
                 state.data.papers = papersResult;
-                
+
                 state.loading = false;
                 state.initialized = true;
 
@@ -388,17 +396,17 @@
                 updateStats();
                 renderAllFeatured();
                 performSearch();
-                
+
                 // Hide main loading state
                 if (loadingState) loadingState.style.display = 'none';
-                
+
                 console.log('Data loaded:', {
                     orgs: state.data.organizations.length,
                     people: state.data.people.length,
                     products: state.data.products.length,
                     papers: state.data.papers.length
                 });
-                
+
             } catch (error) {
                 console.error('Error initializing data:', error);
                 showError('Failed to load database. Please refresh the page.');
@@ -423,7 +431,7 @@
                 .select('*')
                 .eq('status', 'active')
                 .limit(100);
-            
+
             if (error) throw error;
             return (data || []).map(org => ({
                 ...org,
@@ -440,7 +448,7 @@
                 .select('*')
                 .eq('status', 'active')
                 .limit(100);
-            
+
             if (error) throw error;
             return (data || []).map(person => ({
                 ...person,
@@ -458,7 +466,7 @@
                 .select('*')
                 .eq('status', 'active')
                 .limit(100);
-            
+
             if (error) throw error;
             return (data || []).map(product => ({
                 ...product,
@@ -474,7 +482,7 @@
                 .select('*')
                 .eq('status', 'active')
                 .limit(100);
-            
+
             if (error) throw error;
             return (data || []).map(paper => ({
                 ...paper,
@@ -608,36 +616,63 @@
 
             // Apply field filter
             if (state.currentFilter !== 'all') {
-                filtered = filtered.filter(item => 
-                    item.field && item.field.some(f => 
+                filtered = filtered.filter(item =>
+                    item.field && item.field.some(f =>
                         f.toLowerCase().includes(state.currentFilter.toLowerCase())
                     )
                 );
             }
 
-            renderResults(filtered);
+            // Update pagination state
+            state.pagination.totalItems = filtered.length;
+            state.pagination.currentPage = 1;
+
+            // Only render the current page of results
+            renderPaginatedResults(filtered);
             updateResultsHeader(filtered.length);
-            
+
             // Show/hide featured sections based on search
             const isSearching = state.searchQuery !== '' || state.currentFilter !== 'all';
             featuredSection.style.display = isSearching ? 'none' : 'block';
-            
+
             // Scroll to results if searching
             if (isSearching) {
                 document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
 
-        function renderResults(items) {
-            if (items.length === 0) {
+        function renderPaginatedResults(items) {
+            const { itemsPerPage, currentPage } = state.pagination;
+            const startIndex = 0;
+            const endIndex = currentPage * itemsPerPage;
+            const paginatedItems = items.slice(startIndex, endIndex);
+            const hasMore = endIndex < items.length;
+
+            if (paginatedItems.length === 0) {
                 resultsGrid.innerHTML = '';
                 resultsGrid.appendChild(emptyState);
                 emptyState.style.display = 'flex';
+                document.getElementById('load-more').style.display = 'none';
                 return;
             }
 
             emptyState.style.display = 'none';
-            resultsGrid.innerHTML = items.map(item => createCardHTML(item)).join('');
+
+            // For the first page, replace content. For subsequent pages, append new items.
+            if (currentPage === 1) {
+                resultsGrid.innerHTML = paginatedItems.map(item => createCardHTML(item)).join('');
+            } else {
+                const newCards = paginatedItems.slice((currentPage - 1) * itemsPerPage).map(item => createCardHTML(item)).join('');
+                resultsGrid.innerHTML = items.map(item => createCardHTML(item)).join('');
+            }
+
+            const loadMoreBtn = document.getElementById('load-more');
+            if (hasMore) {
+                loadMoreBtn.style.display = 'block';
+                loadMoreBtn.innerHTML = `<button class="btn-secondary" onclick="loadMore()">Load More (${items.length - endIndex} remaining)</button>`;
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
 
             // Add expand functionality
             document.querySelectorAll('.card-expand-btn').forEach(btn => {
@@ -652,10 +687,38 @@
             });
         }
 
+        window.loadMore = function () {
+            state.pagination.currentPage++;
+            const data = state.data[state.currentTab] || [];
+
+            // Re-apply filters to get the full filtered list, then render the next page
+            let filtered = [...data];
+            if (state.searchQuery) {
+                filtered = filtered.filter(item => {
+                    const searchFields = [
+                        item.name || item.title || item.official_name || item.pro_id || '',
+                        item.description || item.abstract || '',
+                        ...(item.field || [])
+                    ].join(' ').toLowerCase();
+                    return searchFields.includes(state.searchQuery);
+                });
+            }
+            if (state.currentFilter !== 'all') {
+                filtered = filtered.filter(item =>
+                    item.field && item.field.some(f =>
+                        f.toLowerCase().includes(state.currentFilter.toLowerCase())
+                    )
+                );
+            }
+
+            renderPaginatedResults(filtered);
+        }
+
+
         function createCardHTML(item) {
             const type = item.type;
-            
-            switch(type) {
+
+            switch (type) {
                 case 'organization':
                     return createOrganizationCard(item);
                 case 'people':
@@ -671,7 +734,7 @@
 
         function createOrganizationCard(org) {
             const fieldsHTML = (org.field || []).map(f => `<span class="field-tag">${f}</span>`).join('');
-            const techsHTML = (org.technologies_and_products || []).slice(0, 3).map(t => 
+            const techsHTML = (org.technologies_and_products || []).slice(0, 3).map(t =>
                 `<span class="tech-tag">${t}</span>`
             ).join('');
 
@@ -813,7 +876,7 @@
 
         function createProductCard(product) {
             const fieldsHTML = (product.field || []).map(f => `<span class="field-tag">${f}</span>`).join('');
-            const featuresHTML = (product.features || []).filter(f => f).slice(0, 3).map(f => 
+            const featuresHTML = (product.features || []).filter(f => f).slice(0, 3).map(f =>
                 `<li>${f}</li>`
             ).join('');
 
@@ -942,13 +1005,16 @@
                 products: 'products',
                 papers: 'papers'
             };
-            
+
+            const { currentPage, itemsPerPage } = state.pagination;
+            const showing = Math.min(currentPage * itemsPerPage, count);
+
             if (state.searchQuery || state.currentFilter !== 'all') {
                 resultsTitle.textContent = `Search Results`;
-                resultsCount.textContent = `${count} ${tabNames[state.currentTab].toLowerCase()} found`;
+                resultsCount.textContent = `Showing ${showing} of ${count} ${tabNames[state.currentTab].toLowerCase()}`;
             } else {
                 resultsTitle.textContent = `All ${tabNames[state.currentTab]}`;
-                resultsCount.textContent = `${count} entries in database`;
+                resultsCount.textContent = `${count} entries total`;
             }
         }
 
@@ -965,12 +1031,12 @@
             const featured = state.data.organizations
                 .filter(org => org.official_name && org.description && org.description.length > 20)
                 .slice(0, 3);
-            
+
             if (featured.length === 0) {
                 container.innerHTML = '<p class="no-data">No organizations available</p>';
                 return;
             }
-            
+
             container.innerHTML = featured.map(org => `
                 <div class="featured-card" onclick="quickSearch('${org.official_name.replace(/'/g, "\\'")}')">
                     <div class="featured-icon org-icon">Org</div>
@@ -989,12 +1055,12 @@
             const featured = state.data.people
                 .filter(p => p.name && p.description && p.description.length > 20)
                 .slice(0, 3);
-            
+
             if (featured.length === 0) {
                 container.innerHTML = '<p class="no-data">No people available</p>';
                 return;
             }
-            
+
             container.innerHTML = featured.map(person => `
                 <div class="featured-card" onclick="quickSearch('${person.name.replace(/'/g, "\\'")}')">
                     <div class="featured-icon people-icon">Ppl</div>
@@ -1013,12 +1079,12 @@
             const featured = state.data.products
                 .filter(p => p.pro_id && p.description && p.description.length > 10)
                 .slice(0, 3);
-            
+
             if (featured.length === 0) {
                 container.innerHTML = '<p class="no-data">No products available</p>';
                 return;
             }
-            
+
             container.innerHTML = featured.map(product => `
                 <div class="featured-card" onclick="quickSearch('${product.pro_id.replace(/'/g, "\\'")}')">
                     <div class="featured-icon product-icon">Prd</div>
@@ -1038,12 +1104,12 @@
                 .filter(p => p.title && p.abstract && p.abstract.length > 50)
                 .sort((a, b) => (parseInt(b.Cited) || 0) - (parseInt(a.Cited) || 0))
                 .slice(0, 3);
-            
+
             if (featured.length === 0) {
                 container.innerHTML = '<p class="no-data">No papers available</p>';
                 return;
             }
-            
+
             container.innerHTML = featured.map(paper => `
                 <div class="featured-card paper-featured" onclick="quickSearch('${paper.title.replace(/'/g, "\\'").substring(0, 30)}')">
                     <div class="featured-icon paper-icon">Ppr</div>
@@ -1059,7 +1125,7 @@
         }
 
         // Utility function for featured card clicks
-        window.quickSearch = function(query) {
+        window.quickSearch = function (query) {
             searchInput.value = query;
             state.searchQuery = query.toLowerCase();
             toggleClearButton();
@@ -1080,7 +1146,7 @@
             const duration = 2000;
             const step = target / (duration / 16);
             let current = 0;
-            
+
             const update = () => {
                 current += step;
                 if (current < target) {
@@ -1123,4 +1189,5 @@
         }
     </script>
 </body>
+
 </html>
