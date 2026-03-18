@@ -663,7 +663,7 @@
                 resultsGrid.innerHTML = paginatedItems.map(item => createCardHTML(item)).join('');
             } else {
                 const newCards = paginatedItems.slice((currentPage - 1) * itemsPerPage).map(item => createCardHTML(item)).join('');
-                resultsGrid.innerHTML = items.map(item => createCardHTML(item)).join('');
+                resultsGrid.insertAdjacentHTML('beforeend', newCards);
             }
 
             const loadMoreBtn = document.getElementById('load-more');
