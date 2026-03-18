@@ -423,7 +423,7 @@ nav a.active::after {
 .section-header p {
     color: var(--text-secondary);
     font-size: 1.1rem;
-    max-width: 600px;
+    max-width: 100%;
 }
 
 /* Bento Grid */
